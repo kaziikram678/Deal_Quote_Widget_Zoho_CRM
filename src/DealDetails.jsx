@@ -14,6 +14,7 @@ import {
   FormControl,
   Snackbar,
   InputLabel,
+  Stack
 } from "@mui/material";
 
 const ITEM_HEIGHT = 48;
@@ -134,8 +135,8 @@ export default function DealDetails({ DealId, moduleName }) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "flex",
+        minHeight: "50vh",
+        //display: "flex",
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "#f4f6f8",
@@ -147,10 +148,10 @@ export default function DealDetails({ DealId, moduleName }) {
         sx={{
           width: 1000,
           borderRadius: 3,
-          
+
         }}
       >
-        <CardContent  sx={{ flex: '1 0 auto' }}>
+        <CardContent>
           <Typography align="center" variant="h6" fontWeight="600" gutterBottom>
             Deal Widget
           </Typography>
@@ -159,7 +160,7 @@ export default function DealDetails({ DealId, moduleName }) {
             Deal Detail Section
           </Typography>
 
-          <Divider sx={{ mb: 1 }} />
+          <Divider sx={{ mb: 2 }} />
 
           {loading ? (
             <Box display="flex" justifyContent="center" py={1}>
@@ -167,25 +168,30 @@ export default function DealDetails({ DealId, moduleName }) {
             </Box>
           ) : (
             <>
-              <TextField
-                fullWidth
-                label="Deal_Name"
-                name="Deal_Name"
-                value={formData.Deal_Name}
-                onChange={handleChange}
-                margin="normal"
-              />
-              <TextField
-                fullWidth
-                type="number"
-                label="Amount"
-                name="Amount"
-                value={formData.Amount}
-                onChange={handleChange}
-                margin="normal"
-              />
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  fullWidth
+                  label="Deal_Name"
+                  name="Deal_Name"
+                  value={formData.Deal_Name}
+                  onChange={handleChange}
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Amount"
+                  name="Amount"
+                  value={formData.Amount}
+                  onChange={handleChange}
+                  margin="normal"
+                />
+              </Stack>
 
-              <TextField
+              <Divider sx={{ mb: 2 }} />
+
+              <Stack direction="row" spacing={2}>
+                <TextField
                 fullWidth
                 label="Account_Name"
                 name="Account_Name"
@@ -202,8 +208,12 @@ export default function DealDetails({ DealId, moduleName }) {
                 //onChange={handleChange}
                 margin="normal"
               />
+              </Stack>
+              
+              <Divider sx={{ mb: 2 }} />
 
-              <TextField
+              <Stack direction="row" spacing={2}>
+                <TextField
                 type="mobile"
                 fullWidth
                 label="Contact_Phone"
@@ -213,7 +223,7 @@ export default function DealDetails({ DealId, moduleName }) {
                 margin="normal"
               />
 
-              <FormControl sx={{ my: 1, width: 300 }}>
+              <FormControl sx={{ my: 1, width: 925 }}>
                 <InputLabel id="demo-multiple-name-label">
                   Stage
                 </InputLabel>
@@ -233,6 +243,9 @@ export default function DealDetails({ DealId, moduleName }) {
                   ))}
                 </Select>
               </FormControl>
+              </Stack>
+              
+              <Divider sx={{ mb: 2 }} />
 
               <Box mt={1}>
                 <Button

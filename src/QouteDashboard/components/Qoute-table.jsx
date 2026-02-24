@@ -30,7 +30,7 @@ export default function QuoteTable({ DealId }) {
       per_page: 200,
     });
 
-    //console.log(quote);
+    console.log(quote);
 
     const rows = (quote.data || []).map((item) => ({
       id: item.id,
@@ -56,7 +56,7 @@ export default function QuoteTable({ DealId }) {
   };
 
   const columns = [
-    { field: "Subject", headerName: "Name", flex: 1 },
+    { field: "Subject", headerName: "Subject", flex: 1 },
     { field: "Quote_Stage", headerName: "Stage", width: 150 },
     { field: "Grand_Total", headerName: "Total", width: 150 },
     { field: "Valid_Till", headerName: "Valid Till", width: 150 },
@@ -82,8 +82,8 @@ export default function QuoteTable({ DealId }) {
     <>
       <Box
         sx={{
-          minHeight: "100vh",
-          display: "flex",
+          minHeight: "50vh",
+         // display: "flex",
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: "#f4f6f8",

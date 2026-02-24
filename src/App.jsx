@@ -26,7 +26,7 @@ export default function App() {
   useEffect(() => {
     ZOHO.embeddedApp.on("PageLoad", function (data) {
 
-      ZOHO.CRM.UI.Resize({ height: "1000", width: "1000" }).then(function (data) {
+      ZOHO.CRM.UI.Resize({ height: "1000", width: "1050" }).then(function (data) {
         console.log(data);
       });
       setModuleName(data.Entity);
