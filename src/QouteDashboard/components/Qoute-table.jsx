@@ -21,7 +21,7 @@ export default function QuoteTable({ DealId }) {
   const [quotes, setQuotes] = useState([]);
   const [editQuote, setEditQuote] = useState(null);
 
-  const fetchQuotes = async () => {
+  const getQuotes = async () => {
     const quote = await ZOHO.CRM.API.getRelatedRecords({
       Entity: "Deals",
       RecordID: DealId,
@@ -30,7 +30,7 @@ export default function QuoteTable({ DealId }) {
       per_page: 200,
     });
 
-    console.log(quote);
+    //console.log(quote);
 
     const rows = (quote.data || []).map((item) => ({
       id: item.id,
@@ -44,7 +44,7 @@ export default function QuoteTable({ DealId }) {
   };
 
   useEffect(() => {
-    fetchQuotes();
+    getQuotes();
   }, [DealId]);
 
   const handleDelete = async (id) => {
@@ -52,7 +52,7 @@ export default function QuoteTable({ DealId }) {
       Entity: "Quotes",
       RecordID: id,
     });
-    fetchQuotes();
+    getQuotes();
   };
 
   const columns = [
@@ -105,10 +105,8 @@ export default function QuoteTable({ DealId }) {
             mb: 1,
           }}
         >
-
-
           <Typography variant="h6">Related Quotes</Typography>
-          <AddQuote DealId={DealId} onSuccess={fetchQuotes} />
+          <AddQuote DealId={DealId} onSuccess={getQuotes} />
         </Box>
 
         <Paper sx={{ height: 420 }}>
@@ -124,7 +122,7 @@ export default function QuoteTable({ DealId }) {
           <UpdateDialog
             quote={editQuote}
             onClose={() => setEditQuote(null)}
-            onSuccess={fetchQuotes}
+            onSuccess={getQuotes}
           />
         )}
         </CardContent>
