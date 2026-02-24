@@ -140,7 +140,6 @@ export default function DealDetails({ DealId, moduleName }) {
         justifyContent: "center",
         backgroundColor: "#f4f6f8",
         p: 2,
-        flexDirection: 'column'
       }}
     >
       <Card
