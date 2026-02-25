@@ -77,7 +77,7 @@ export default function DealDetails({ DealId, moduleName }) {
       })
         .then(function (response) {
           const deal = response.data[0];
-          console.log(deal.Contact_Phone);
+         // console.log(deal.Contact_Phone);
           setformData({
             Deal_Name: deal.Deal_Name,
             Amount: deal.Amount,
@@ -105,7 +105,7 @@ export default function DealDetails({ DealId, moduleName }) {
   const handleUpdate = () => {
     setSaving(true);
     setOpen(true);
-    console.log(formData.Contact_Name);
+    //console.log(formData.Contact_Name);
     const config = {
       Entity: moduleName,
       APIData: {

@@ -10,7 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState } from "react";
 import UpdateDialog from "./EditQoute-diaog"
-import AddQuote from "./AddQoute-dialog";
+import AddQuote from "./AddQoute_Dialouge";
 import {
   Card,
   CardContent,
@@ -20,6 +20,8 @@ const ZOHO = window.ZOHO;
 export default function QuoteTable({ DealId }) {
   const [quotes, setQuotes] = useState([]);
   const [editQuote, setEditQuote] = useState(null);
+  const [products, setProducts] = useState([]);
+  
 
   const getQuotes = async () => {
     const quote = await ZOHO.CRM.API.getRelatedRecords({
@@ -38,9 +40,14 @@ export default function QuoteTable({ DealId }) {
       Quote_Stage: item.Quote_Stage,
       Grand_Total: item.Grand_Total,
       Valid_Till: item.Valid_Till,
+      Products: item.Product_Details.map((item)=>item.product.name),
+      Products_Id: item.Product_Details.map((item)=>item.product.id),
     }));
 
-    setQuotes(rows);
+    setQuotes(rows); 
+    {rows.map((item)=>{
+      console.log(item.Products);
+    })}
   };
 
   useEffect(() => {
@@ -55,11 +62,11 @@ export default function QuoteTable({ DealId }) {
     getQuotes();
   };
 
-  const columns = [
-    { field: "Subject", headerName: "Subject", flex: 1 },
+  const columns = [  
+    { field: "Subject", headerName: "Subject", width: 250 },
     { field: "Quote_Stage", headerName: "Stage", width: 150 },
     { field: "Grand_Total", headerName: "Total", width: 150 },
-    { field: "Valid_Till", headerName: "Valid Till", width: 150 },
+    { field: "Products", headerName: "Products", width:300 },
     {
       field: "actions",
       headerName: "Action",

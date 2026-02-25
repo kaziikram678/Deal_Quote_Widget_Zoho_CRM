@@ -14,7 +14,9 @@ import {
   InputLabel,
   FormGroup,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Typography,
+  Box
 
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -40,6 +42,7 @@ const Quote_Stage = [
   'Closed Lost'
 ];
 
+
 const ZOHO = window.ZOHO;
 
 export default function AddQuote({ DealId, onSuccess }) {
@@ -51,11 +54,14 @@ export default function AddQuote({ DealId, onSuccess }) {
   const [quantity, setQuantity] = useState(0);
   const [listPrice, setListPrice] = useState(0);
   const [productId, setProductId] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+
 
   const getProducts = async () => {
-    const product = await ZOHO.CRM.API.getAllRecords({ Entity: "Products", sort_order: "asc", per_page: 100, page: 1 })
+    const product = await ZOHO.CRM.API.getAllRecords({ Entity: "Products", sort_order: "asc", per_page: 200, page: 1 })
       .then(function (data) {
-        console.log(data)
+        //console.log(data)
         setProducts(data.data);
       })
   };
@@ -72,15 +78,15 @@ export default function AddQuote({ DealId, onSuccess }) {
       "Deal_Name": {
         "id": DealId,
       },
-      "Product_Details": [{
+      "Product_Details": selectedProducts.map((product) => ({
         "product": {
-          "id": productId,
-          "name": productName
+          "id": product.id,
         },
-        "quantity": quantity,
-        "list_price": listPrice
-      },],
+        "quantity": product.quantity,
+        "list_price": product.list_price,
+      }))
     }
+
     await ZOHO.CRM.API.insertRecord({ Entity: "Quotes", APIData: recordData }).then(function (data) {
       console.log(data);
     });
@@ -89,7 +95,14 @@ export default function AddQuote({ DealId, onSuccess }) {
     setSubject("");
     setStage("");
     onSuccess();
+    setSelectedProducts([]);
   };
+
+
+  const grandTotal = selectedProducts.reduce(
+    (sum, p) => sum + p.quantity * p.list_price,
+    0
+  );
 
   return (
     <>
@@ -133,55 +146,94 @@ export default function AddQuote({ DealId, onSuccess }) {
           </FormControl>
 
           <FormControl sx={{ my: 1, width: 500 }}>
-            <InputLabel id="demo-multiple-name-label">
+            <InputLabel>
               Select Products
             </InputLabel>
             <Select
+              label="Products"
               multiple
-              labelId="demo-multiple-name-label"
-              id="demo-multiple-name"
-              label="Select Product"
-              name=""
-              value={productName}
+              value={selectedProducts.map((product) => product.id)}
               onChange={(e) => {
-                setProductName(e.target.value),
-                setProductId(e.target.value)
+                const ids = e.target.value;
+                const selected = ids.map((id) => {
+                  const product = products.find((p) => p.id === id)
+
+                  return {
+                    id: product.id,
+                    name: product.Product_Name,
+                    quantity: 1,
+                    list_price: product.Unit_Price
+                  };
+                });
+
+                setSelectedProducts(selected);
               }}
-              input={<OutlinedInput label="Quote_Stage" />}
+              input={<OutlinedInput label="Select Products" />}
               MenuProps={MenuProps}
             >
               {products.map((product) => (
-                <MenuItem key={product.id} value={product.Product_Name}>
+                <MenuItem key={product.id} value={product.id}>
                   {product.Product_Name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <TextField
+          {selectedProducts.map((p, index) => (
+            <Paper key={p.id} sx={{ p: 2, mb: 1 }}>
+              <Typography fontWeight={"bold"}>{p.name}</Typography>
+
+              <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+
+                <TextField
+                  type="number"
+                  fullWidth
+                  label="Quantity"
+                  variant="standard"
+                  value={p.quantity}
+                  onChange={(e) => {
+                    const selected = [...selectedProducts];
+                    selected[index].quantity = Number(e.target.value);
+                    setSelectedProducts(selected);
+                  }}
+                >
+                </TextField>
+              </Box>
+            </Paper>
+          ))}
+
+          {/* <TextField
             type="number"
             fullWidth
             label="Quantity"
             variant="standard"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-          />
+          /> */}
 
-          <TextField
+          {/* <TextField
             type="number"
             fullWidth
             label="List Price"
             variant="standard"
             value={listPrice}
             onChange={(e) => setListPrice(e.target.value)}
+          /> */}
+
+          <TextField
+            fullWidth
+            label="Grand_Total"
+            variant="standard"
+            value={grandTotal}
+            sx={{ mt: 2 }}
           />
-        </DialogContent>
+        </DialogContent >
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={handleCreate}>Create</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog >
     </>
   );
 }

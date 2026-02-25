@@ -9,7 +9,7 @@ import DealDetails from './DealDetails';
 import MenuAppBar from './QouteDashboard/components/Dashboard-header';
 import DataTable from './QouteDashboard/components/Qoute-table';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
-import AddQuote from './QouteDashboard/components/AddQoute-dialog';
+import AddQuote from './QouteDashboard/components/AddQoute_Dialouge';
 const darkTheme = createTheme({
   palette: { mode: "dark" },
 });
@@ -27,11 +27,11 @@ export default function App() {
     ZOHO.embeddedApp.on("PageLoad", function (data) {
 
       ZOHO.CRM.UI.Resize({ height: "1000", width: "1050" }).then(function (data) {
-        console.log(data);
+        //console.log(data);
       });
       setModuleName(data.Entity);
       setEntityId(data.EntityId[0]);
-      console.log(data);
+     // console.log(data);
       setZohoLoaded(true);
     });
 
@@ -40,7 +40,7 @@ export default function App() {
 
 
 
-  console.log(moduleName)
+  //console.log(moduleName)
   if (!zohoLoaded || !moduleName) {
     return <>Fetching Data. Please wait...</>
   }
