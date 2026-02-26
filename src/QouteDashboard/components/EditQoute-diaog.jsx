@@ -12,9 +12,12 @@ import {
   InputLabel,
   Select,
   OutlinedInput,
-  MenuItem
+  MenuItem,
+  Divider,
+  Snackbar,
+  CircularProgress
 } from "@mui/material";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -45,9 +48,55 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [products, setProducts] = useState([]);
 
-  setProducts(quote.Product_Details);
-  console.log(quote);
-  console.log(quote.Product_Details);
+  const [open, setOpen] = React.useState(false);
+  const [saving, setSaving] = useState(false);
+
+  ///////////////////////////Snakebar//////////////////////////
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false);
+  };
+
+  const AddNewProducts = () => {
+
+  }
+
+
+  const getProducts = async () => {
+    const product = await ZOHO.CRM.API.getAllRecords({ Entity: "Products", sort_order: "asc", per_page: 200, page: 1 })
+      .then(function (data) {
+        //console.log(data)
+        setProducts(data.data);
+      })
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, [onSuccess]);
+
+  const getProductDetails = () => {
+    console.log(quote.Products_details);
+
+    const selected = quote.Products_details.map((item) => {
+      return {
+        id: item.product.id,
+        name: item.product.name,
+        quantity: item.quantity,
+        list_price: item.list_price,
+      }
+    })
+
+    console.log(selected);
+
+    setSelectedProducts(selected)
+  }
+
+  useEffect(() => {
+    getProductDetails();
+  }, [onSuccess]);
 
   const handleUpdate = async () => {
     await ZOHO.CRM.API.updateRecord({
@@ -55,9 +104,18 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
       APIData: {
         id: quote.id,
         Subject: subject,
-        Quote_Stage: quoteStage
+        Quote_Stage: quoteStage,
+        Product_Details: selectedProducts.map((product) => ({
+          product: {
+            id: product.id,
+          },
+          quantity: product.quantity,
+          list_price: product.list_price,
+        }))
       },
-    });
+    }).catch(() => {
+      setSaving(false);
+    });;
 
     onClose();
     onSuccess();
@@ -82,6 +140,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
           onChange={(e) => setSubject(e.target.value)}
         />
 
+        <Divider sx={{ mb: 2 }} />
 
         <FormControl sx={{ my: 1, width: 500 }}>
           <InputLabel id="demo-multiple-name-label">
@@ -105,12 +164,12 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
           </Select>
         </FormControl>
 
-
         <FormControl sx={{ my: 1, width: 500 }}>
           <InputLabel>
             Select Products
           </InputLabel>
           <Select
+            label="Products"
             multiple
             value={selectedProducts.map((product) => product.id)}
             onChange={(e) => {
@@ -161,24 +220,6 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
             </Box>
           </Paper>
         ))}
-
-        {/* <TextField
-            type="number"
-            fullWidth
-            label="Quantity"
-            variant="standard"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          /> */}
-
-        {/* <TextField
-            type="number"
-            fullWidth
-            label="List Price"
-            variant="standard"
-            value={listPrice}
-            onChange={(e) => setListPrice(e.target.value)}
-          /> */}
 
         <TextField
           fullWidth

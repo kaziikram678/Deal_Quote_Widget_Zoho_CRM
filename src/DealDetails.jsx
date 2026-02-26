@@ -102,7 +102,7 @@ export default function DealDetails({ DealId, moduleName }) {
     });
   };
 
-  const handleUpdate = () => {
+  const handleQuoteUpdate = () => {
     setSaving(true);
     setOpen(true);
     //console.log(formData.Contact_Name);
@@ -252,7 +252,7 @@ export default function DealDetails({ DealId, moduleName }) {
                   fullWidth
                   variant="contained"
                   size="large"
-                  onClick={handleUpdate}
+                  onClick={handleQuoteUpdate}
                   disabled={saving}
                   sx={{
                     textTransform: "none",

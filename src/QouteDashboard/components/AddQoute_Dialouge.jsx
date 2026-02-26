@@ -50,10 +50,6 @@ export default function AddQuote({ DealId, onSuccess }) {
   const [subject, setSubject] = useState("");
   const [stage, setStage] = useState("");
   const [products, setProducts] = useState([]);
-  const [productName, setProductName] = useState([]);
-  const [quantity, setQuantity] = useState(0);
-  const [listPrice, setListPrice] = useState(0);
-  const [productId, setProductId] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
 
 
@@ -201,24 +197,6 @@ export default function AddQuote({ DealId, onSuccess }) {
               </Box>
             </Paper>
           ))}
-
-          {/* <TextField
-            type="number"
-            fullWidth
-            label="Quantity"
-            variant="standard"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          /> */}
-
-          {/* <TextField
-            type="number"
-            fullWidth
-            label="List Price"
-            variant="standard"
-            value={listPrice}
-            onChange={(e) => setListPrice(e.target.value)}
-          /> */}
 
           <TextField
             fullWidth
