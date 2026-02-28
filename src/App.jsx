@@ -7,7 +7,7 @@ import React, { useEffect, useState, useReducer } from "react";
 import UpdateLeadData from './UpdateLeadData';
 import DealDetails from './DealDetails';
 import MenuAppBar from './QouteDashboard/components/Dashboard-header';
-import DataTable from './QouteDashboard/components/Qoute-table';
+import QuoteTable from './QouteDashboard/components/Qoute-table';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
 import AddQuote from './QouteDashboard/components/AddQoute_Dialouge';
 const darkTheme = createTheme({
@@ -22,6 +22,8 @@ export default function App() {
   const [zohoLoaded, setZohoLoaded] = useState(false);
   const [moduleName, setModuleName] = useState("");
   const [entityId, setEntityId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     ZOHO.embeddedApp.on("PageLoad", function (data) {
@@ -38,29 +40,56 @@ export default function App() {
     ZOHO.embeddedApp.init()
   }, []);
 
+  /////////////////////DealForm////////////////////////
+
+  const [formDataList, setformDataList] = useState({
+    Deal_Name: "",
+    Amount: "",
+    Account_Name: "",
+    Contact_Phone: 0,
+    Stage: [],
+  });
+
+  useEffect(() => {
+    if (moduleName && entityId) {
+      ZOHO.CRM.API.getRecord({
+        Entity: moduleName,
+        RecordID: entityId,
+      })
+        .then(function (response) {
+          const deal = response.data[0];
+          // console.log(deal.Contact_Phone);
+          setformDataList({
+            Deal_Name: deal.Deal_Name,
+            Amount: deal.Amount,
+            Account_Name: deal.Account_Name.name,
+            Contact_Name: deal.Contact_Name.name,
+            Contact_Phone: deal.Contact_Phone,
+            Stage: deal.Stage,
+          });
+
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    }
+  }, [moduleName, entityId]);
 
 
-  //console.log(moduleName)
-  if (!zohoLoaded || !moduleName) {
+
+// console.log(formDataList)
+  if (!zohoLoaded || !moduleName || !formDataList) {
     return <>Fetching Data. Please wait...</>
   }
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      {/* <LeadSearch moduleName={moduleName}/> */}
-      {/* <LeadUpdate moduleName={moduleName} entityId={entityId}/> */}
-      {/* <UpdateLeadData/> */}
-      <DealDetails DealId={entityId} moduleName={moduleName} />
-
-      {/* <MenuAppBar dispatch={dispatch} />
-
-      <DataTable DealId={entityId} moduleName={moduleName} dispatch={dispatch} /> */}
-
+      <DealDetails DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}/>
       <MenuAppBar>
         <AddQuote DealId={entityId} onSuccess={() => { }} />
       </MenuAppBar>
-
-      <DataTable DealId={entityId} moduleName={moduleName} />
+      {/* <QuoteTable DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}/> */}
     </ThemeProvider>
   );
 }

@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import React ,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import UpdateDialog from "./EditQoute-diaog"
 import AddQuote from "./AddQoute_Dialouge";
 import {
@@ -20,16 +20,21 @@ import {
 
 const ZOHO = window.ZOHO;
 
-export default function QuoteTable({ DealId }) {
+export default function QuoteTable({ DealId, moduleName, formDataList, loading }) {
   const [quotes, setQuotes] = useState([]);
   const [editQuote, setEditQuote] = useState(null);
-  const [products, setProducts] = useState([]);
-
-
   const [saving, setSaving] = useState(false);
-
-
+  const [quoteSaving, setQuoteSaving] = useState(false);
   const [open, setOpen] = React.useState(false);
+
+  const [formData, setformData] = useState({});
+
+  // console.log(formDataList)
+
+  // console.log(formData);
+  useEffect(() => {
+    setformData(formDataList)
+  }, [formDataList])
 
   ///////////////////////////Snakebar//////////////////////////
 
@@ -38,6 +43,40 @@ export default function QuoteTable({ DealId }) {
       return;
     }
     setOpen(false);
+  };
+
+  ////////////////////////////Quote Update////////////////////////
+  // console.log(formData.Contact_Name);
+
+
+  const handleQuoteUpdate = async () => {
+    setQuoteSaving(true);
+    setOpen(true);
+    console.log(formData.Contact_Name);
+    const config = {
+      Entity: moduleName,
+      APIData: {
+        id: DealId,
+        Deal_Name: formData.Deal_Name,
+        Amount: formData.Amount,
+        Contact_Phone: formData.Contact_Phone,
+        Stage: formData.Stage,
+      },
+    };
+
+    await ZOHO.CRM.API.updateRecord(config)
+      .then(function () {
+        setQuoteSaving(false);
+      })
+      .catch(() => {
+        setQuoteSaving(false);
+      });
+
+    await ZOHO.CRM.UI.Popup.closeReload()
+      .then(function (data) {
+        console.log(data)
+      })
+
   };
 
 
@@ -50,9 +89,9 @@ export default function QuoteTable({ DealId }) {
       per_page: 200,
     }).catch(() => {
       setSaving(false);
-    });;
+    });
 
-    console.log(quote);
+    //console.log(quote);
 
     const rows = (quote.data || []).map((item) => ({
       id: item.id,
@@ -65,11 +104,6 @@ export default function QuoteTable({ DealId }) {
     }));
 
     setQuotes(rows);
-    {
-      rows.map((item) => {
-        console.log(item.Products_details);
-      })
-    }
   };
 
   useEffect(() => {
@@ -153,7 +187,7 @@ export default function QuoteTable({ DealId }) {
                 variant="contained"
                 size="large"
                 onClick={handleQuoteUpdate}
-                disabled={saving}
+                disabled={quoteSaving}
                 sx={{
                   textTransform: "none",
                   borderRadius: 2,
@@ -166,7 +200,7 @@ export default function QuoteTable({ DealId }) {
                   onClose={handleClose}
                   message="Deal Updated Successfully"
                 />
-                {saving ? (
+                {quoteSaving ? (
                   <CircularProgress size={22} color="inherit" />
                 ) : (
                   "Save Changes"
@@ -187,3 +221,4 @@ export default function QuoteTable({ DealId }) {
     </>
   );
 }
+

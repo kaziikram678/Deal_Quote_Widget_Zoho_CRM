@@ -16,6 +16,7 @@ import {
   InputLabel,
   Stack
 } from "@mui/material";
+import QuoteTable from "./QouteDashboard/components/Qoute-table";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -41,14 +42,22 @@ const Stage = [
 ];
 
 const ZOHO = window.ZOHO;
-export default function DealDetails({ DealId, moduleName }) {
+export default function DealDetails({ DealId, moduleName, formDataList, loading }) {
 
-  const [loading, setLoading] = useState(true);
 
   const [saving, setSaving] = useState(false);
 
-
   const [open, setOpen] = React.useState(false);
+
+  const [formData, setformData] = useState({});
+
+  // console.log(formDataList)
+
+  // console.log(formData);
+  useEffect(() => {
+    setformData(formDataList)
+  }, [formDataList])
+
 
   ///////////////////////////Snakebar//////////////////////////
 
@@ -59,41 +68,18 @@ export default function DealDetails({ DealId, moduleName }) {
     setOpen(false);
   };
 
-  /////////////////////DealForm////////////////////////
-
-  const [formData, setformData] = useState({
-    Deal_Name: "",
-    Amount: "",
-    Account_Name: "",
-    Contact_Phone: 0,
-    Stage: [],
-  });
-
-  useEffect(() => {
-    if (moduleName && DealId) {
-      ZOHO.CRM.API.getRecord({
-        Entity: moduleName,
-        RecordID: DealId,
+  const getMetaData = () => {
+    var func_name = "Deal_Quote_For_Widget";
+    var req_data = {
+      "arguments": JSON.stringify({
+        "deal_id": DealId
       })
-        .then(function (response) {
-          const deal = response.data[0];
-         // console.log(deal.Contact_Phone);
-          setformData({
-            Deal_Name: deal.Deal_Name,
-            Amount: deal.Amount,
-            Account_Name: deal.Account_Name.name,
-            Contact_Name: deal.Contact_Name.name,
-            Contact_Phone: deal.Contact_Phone,
-            Stage: deal.Stage,
-          });
-
-          setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-        });
-    }
-  }, [moduleName, DealId]);
+    };
+    ZOHO.CRM.FUNCTIONS.execute(func_name, req_data)
+      .then(function (data) {
+        console.log(data)
+      })
+  }
 
   const handleChange = (e) => {
     setformData({
@@ -102,37 +88,33 @@ export default function DealDetails({ DealId, moduleName }) {
     });
   };
 
-  const handleQuoteUpdate = () => {
-    setSaving(true);
-    setOpen(true);
-    //console.log(formData.Contact_Name);
-    const config = {
-      Entity: moduleName,
-      APIData: {
-        id: DealId,
-        Deal_Name: formData.Deal_Name,
-        Amount: formData.Amount,
-        Contact_Phone: formData.Contact_Phone,
-        Stage: formData.Stage,
-      },
-    };
+  // const handleQuoteUpdate = () => {
+  //   setSaving(true);
+  //   setOpen(true);
+  //   console.log(formData.Contact_Name);
+  //   const config = {
+  //     Entity: moduleName,
+  //     APIData: {
+  //       id: DealId,
+  //       Deal_Name: formData.Deal_Name,
+  //       Amount: formData.Amount,
+  //       Contact_Phone: formData.Contact_Phone,
+  //       Stage: formData.Stage,
+  //     },
+  //   };
 
-    ZOHO.CRM.API.updateRecord(config)
-      .then(function () {
-        setSaving(false);
-      })
-      .catch(() => {
-        setSaving(false);
-      });
+  //   ZOHO.CRM.API.updateRecord(config)
+  //     .then(function () {
+  //       setSaving(false);
+  //     })
+  //     .catch(() => {
+  //       setSaving(false);
+  //     });
 
-    ZOHO.CRM.API.getRelatedRecords({ Entity: "Deals", RecordID: DealId, RelatedList: "Quotes", page: 1, per_page: 200 })
-      .then(function (data) {
-        console.log(data)
-      })
-
-  };
+  // };
 
   return (
+    <>
     <Box
       sx={{
         minHeight: "50vh",
@@ -192,59 +174,59 @@ export default function DealDetails({ DealId, moduleName }) {
 
               <Stack direction="row" spacing={2}>
                 <TextField
-                fullWidth
-                label="Account_Name"
-                name="Account_Name"
-                value={formData.Account_Name}
-                //onChange={handleChange}
-                margin="normal"
-              />
+                  fullWidth
+                  label="Account_Name"
+                  name="Account_Name"
+                  value={formData.Account_Name}
+                  //onChange={handleChange}
+                  margin="normal"
+                />
 
-              <TextField
-                fullWidth
-                label="Contact_Name"
-                name="Contact_Name"
-                value={formData.Contact_Name}
-                //onChange={handleChange}
-                margin="normal"
-              />
+                <TextField
+                  fullWidth
+                  label="Contact_Name"
+                  name="Contact_Name"
+                  value={formData.Contact_Name}
+                  //onChange={handleChange}
+                  margin="normal"
+                />
               </Stack>
-              
+
               <Divider sx={{ mb: 2 }} />
 
               <Stack direction="row" spacing={2}>
                 <TextField
-                type="mobile"
-                fullWidth
-                label="Contact_Phone"
-                name="Contact_Phone"
-                value={formData.Contact_Phone}
-                onChange={handleChange}
-                margin="normal"
-              />
-
-              <FormControl sx={{ my: 1, width: 925 }}>
-                <InputLabel id="demo-multiple-name-label">
-                  Stage
-                </InputLabel>
-                <Select
-                  labelId="demo-multiple-name-label"
-                  id="demo-multiple-name"
-                  name="Stage"
-                  value={formData.Stage}
+                  type="mobile"
+                  fullWidth
+                  label="Contact_Phone"
+                  name="Contact_Phone"
+                  value={formData.Contact_Phone}
                   onChange={handleChange}
-                  input={<OutlinedInput label="Name" />}
-                  MenuProps={MenuProps}
-                >
-                  {Stage.map((item) => (
-                    <MenuItem key={item} value={item}>
-                      {item}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  margin="normal"
+                />
+
+                <FormControl sx={{ my: 1, width: 925 }}>
+                  <InputLabel id="demo-multiple-name-label">
+                    Stage
+                  </InputLabel>
+                  <Select
+                    labelId="demo-multiple-name-label"
+                    id="demo-multiple-name"
+                    name="Stage"
+                    value={formData.Stage}
+                    onChange={handleChange}
+                    input={<OutlinedInput label="Name" />}
+                    MenuProps={MenuProps}
+                  >
+                    {Stage.map((item) => (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Stack>
-              
+
               <Divider sx={{ mb: 2 }} />
 
               <Box mt={1}>
@@ -252,7 +234,7 @@ export default function DealDetails({ DealId, moduleName }) {
                   fullWidth
                   variant="contained"
                   size="large"
-                  onClick={handleQuoteUpdate}
+                  onClick={getMetaData}
                   disabled={saving}
                   sx={{
                     textTransform: "none",
@@ -269,7 +251,7 @@ export default function DealDetails({ DealId, moduleName }) {
                   {saving ? (
                     <CircularProgress size={22} color="inherit" />
                   ) : (
-                    "Save Changes"
+                    "Get MetaData"
                   )}
                 </Button>
               </Box>
@@ -278,5 +260,8 @@ export default function DealDetails({ DealId, moduleName }) {
         </CardContent>
       </Card>
     </Box>
+    <QuoteTable DealId={DealId} moduleName={moduleName} formDataList = {formData} loading={loading}/>
+    </>
   );
 }
+
