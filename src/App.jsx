@@ -46,7 +46,9 @@ export default function App() {
     Deal_Name: "",
     Amount: "",
     Account_Name: "",
+    Account_Id: "",
     Contact_Phone: 0,
+    Contact_Id: "",
     Stage: [],
   });
 
@@ -58,12 +60,14 @@ export default function App() {
       })
         .then(function (response) {
           const deal = response.data[0];
-          // console.log(deal.Contact_Phone);
+          console.log(deal.Account_Name.id);
           setformDataList({
             Deal_Name: deal.Deal_Name,
             Amount: deal.Amount,
             Account_Name: deal.Account_Name.name,
+            Account_Id: deal.Account_Name.id,
             Contact_Name: deal.Contact_Name.name,
+            Contact_Id: deal.Contact_Name.id,
             Contact_Phone: deal.Contact_Phone,
             Stage: deal.Stage,
           });
@@ -76,20 +80,16 @@ export default function App() {
     }
   }, [moduleName, entityId]);
 
-
-
-// console.log(formDataList)
   if (!zohoLoaded || !moduleName || !formDataList) {
     return <>Fetching Data. Please wait...</>
   }
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <DealDetails DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}/>
+      <DealDetails DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}  Account_Id={formDataList.Account_Id} Contact_Id={formDataList.Contact_Id}/>
       <MenuAppBar>
         <AddQuote DealId={entityId} onSuccess={() => { }} />
       </MenuAppBar>
-      {/* <QuoteTable DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}/> */}
     </ThemeProvider>
   );
 }
