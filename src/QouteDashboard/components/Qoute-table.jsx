@@ -20,14 +20,16 @@ import {
 
 const ZOHO = window.ZOHO;
 
-export default function QuoteTable({ DealId, moduleName, formDataList, loading }) {
+export default function QuoteTable({ DealId, moduleName, formDataList, loading}) {
   const [quotes, setQuotes] = useState([]);
   const [editQuote, setEditQuote] = useState(null);
   const [saving, setSaving] = useState(false);
   const [quoteSaving, setQuoteSaving] = useState(false);
   const [open, setOpen] = React.useState(false);
-
+  const [quoteStageList, setQuoteStageList] = useState([])
   const [formData, setformData] = useState({});
+
+  const quote_stage_list = quoteStageList.toString().split(",");
 
   // console.log(formDataList)
 
@@ -44,6 +46,24 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
     }
     setOpen(false);
   };
+
+  /////////////////////GetQuoteStage/////////////////////////////
+
+  useEffect(() => {
+      var func_name = "qoute_stage_for_widget";
+      var req_data = {
+        "arguments": JSON.stringify({
+        })
+      };
+      ZOHO.CRM.FUNCTIONS.execute(func_name, req_data)
+        .then(function (data) {
+          //console.log(data);
+          setQuoteStageList(data.details.output);
+        })
+    }, [quoteStageList])
+
+    ///console.log(quoteStageList);
+  
 
   ////////////////////////////Quote Update////////////////////////
   // console.log(formData.Contact_Name);
@@ -169,7 +189,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
               }}
             >
               <Typography variant="h6">Related Quotes</Typography>
-              <AddQuote DealId={DealId} onSuccess={getQuotes} />
+              <AddQuote DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} />
             </Box>
 
             <Paper sx={{ height: 420 }}>
@@ -213,6 +233,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
                 quote={editQuote}
                 onClose={() => setEditQuote(null)}
                 onSuccess={getQuotes}
+                quote_stage_list={quote_stage_list}
               />
             )}
           </CardContent>

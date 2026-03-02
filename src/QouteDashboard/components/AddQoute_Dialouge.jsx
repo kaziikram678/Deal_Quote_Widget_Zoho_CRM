@@ -32,20 +32,11 @@ const MenuProps = {
   },
 };
 
-const Quote_Stage = [
-  'Draft',
-  'Negotiation',
-  'Delivered',
-  'On Hold',
-  'Confirmed',
-  'Closed Won',
-  'Closed Lost'
-];
 
 
 const ZOHO = window.ZOHO;
 
-export default function AddQuote({ DealId, onSuccess }) {
+export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [stage, setStage] = useState("");
@@ -133,7 +124,7 @@ export default function AddQuote({ DealId, onSuccess }) {
               input={<OutlinedInput label="Quote_Stage" />}
               MenuProps={MenuProps}
             >
-              {Quote_Stage.map((item) => (
+              {quote_stage_list.map((item) => (
                 <MenuItem key={item} value={item}>
                   {item}
                 </MenuItem>

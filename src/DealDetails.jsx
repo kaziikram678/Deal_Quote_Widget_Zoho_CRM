@@ -20,6 +20,8 @@ import QuoteTable from "./QouteDashboard/components/Qoute-table";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import AccountDetails from "./QouteDashboard/components/AccountDetails";
+import ContactDetails from "./QouteDashboard/components/ContactDetails";
+import Modal from '@mui/material/Modal';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -36,13 +38,25 @@ const MenuProps = {
 const ZOHO = window.ZOHO;
 export default function DealDetails({ DealId, moduleName, formDataList, loading, Account_Id, Contact_Id }) {
 
+  //console.log(Contact_Id)
+
   const [open, setOpen] = React.useState(false);
 
   const [formData, setformData] = useState({});
 
   const [stageList, setStageList] = useState([]);
 
+  const [selectedAccount, setSelectedAccount] = useState([]);
+
+  const [accounts, setAccounts] = useState([]);
+
   const stage_list = stageList.toString().split(",");
+
+  /////////////////////usestates for modal////////////////////
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const handleModalOpen = () => setModalOpen(true);
+  const handleModalClose = () => setModalOpen(false);
 
 
   useEffect(() => {
@@ -78,13 +92,21 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
     });
   };
 
-  console.log(Account_Id);
-  
-  const handleAccountDetails = () => {
-    return (
-      <AccountDetails Account_Id={Account_Id} />
-    )
+  const getAccounts = async () => {
+    var conn_name = "ikram_connection_crm";
+    var req_data = {
+      "method": "GET",
+      "url": "https://www.zohoapis.com/crm/v8/Accounts?fields=Account_Name",
+      "param_type": 1
+    };
+    await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
+      .then(function (data) {
+        //console.log(data.details.statusMessage.data);
+        setAccounts(data.details.data);
+      })
   }
+
+  //console.log(Account_Id);
 
   return (
     <>
@@ -145,13 +167,13 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                 <Divider sx={{ mb: 2 }} />
 
                 <Stack direction="row" spacing={2}>
-                  <Button
+                  {/* <Button
                     fullWidth
                     variant="outlined"
                     size="large"
                     color="white"
                     startIcon={<AccountCircleIcon />}
-                    onClick={handleAccountDetails}
+                    onClick={handleModalOpen}
                     sx={{
                       textTransform: "none",
                       textAlign: "left",
@@ -162,6 +184,35 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                   >
                     {formData.Account_Name}
                   </Button>
+                  <Modal
+                    open={modalOpen}
+                    onClose={handleModalClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <AccountDetails Account_Id={Account_Id}/>
+                  </Modal> */}
+
+                  <FormControl sx={{ my: 1, width: 960 }}>
+                    <InputLabel id="demo-multiple-name-label">
+                      Stage
+                    </InputLabel>
+                    <Select
+                      labelId="demo-multiple-name-label"
+                      id="demo-multiple-name"
+                      name="Stage"
+                      value={formData.Stage}
+                      onChange={handleChange}
+                      input={<OutlinedInput label="Name" />}
+                      MenuProps={MenuProps}
+                    >
+                      {stage_list.map((item) => (
+                        <MenuItem key={item} value={item}>
+                          {item}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
                   <Button
                     fullWidth
@@ -169,7 +220,7 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                     size="large"
                     color="white"
                     startIcon={<ContactPhoneIcon />}
-                    //onClick={handleQuoteUpdate}
+                    onClick={handleModalOpen}
                     sx={{
                       textTransform: "none",
                       borderRadius: 0.5,
@@ -179,6 +230,14 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                   >
                     {formData.Contact_Name}
                   </Button>
+                  {/* <Modal
+                    open={modalOpen}
+                    onClose={handleModalClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <ContactDetails Contact_Id={Contact_Id}/>
+                  </Modal> */}
                 </Stack>
 
                 <Divider sx={{ mb: 2 }} />
@@ -215,14 +274,13 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                     </Select>
                   </FormControl>
                 </Stack>
-
                 <Divider sx={{ mb: 2 }} />
               </>
             )}
           </CardContent>
         </Card>
       </Box>
-      <QuoteTable DealId={DealId} moduleName={moduleName} formDataList={formData} loading={loading} />
+      <QuoteTable DealId={DealId} moduleName={moduleName} formDataList={formData} loading={loading} stage_list={stage_list} />
     </>
   );
 }

@@ -60,7 +60,7 @@ export default function App() {
       })
         .then(function (response) {
           const deal = response.data[0];
-          console.log(deal.Account_Name.id);
+          //console.log(deal.Contact_Name.id);
           setformDataList({
             Deal_Name: deal.Deal_Name,
             Amount: deal.Amount,

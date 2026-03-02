@@ -30,19 +30,9 @@ const MenuProps = {
   },
 };
 
-const Quote_Stage = [
-  'Draft',
-  'Negotiation',
-  'Delivered',
-  'On Hold',
-  'Confirmed',
-  'Closed Won',
-  'Closed Lost'
-];
-
 const ZOHO = window.ZOHO;
 
-export default function UpdateDialog({ quote, onClose, onSuccess }) {
+export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_list }) {
   const [subject, setSubject] = useState(quote.Subject);
   const [quoteStage, setQuoteStage] = useState(quote.Quote_Stage);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -59,11 +49,6 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
     }
     setOpen(false);
   };
-
-  const AddNewProducts = () => {
-
-  }
-
 
   const getProducts = async () => {
     const product = await ZOHO.CRM.API.getAllRecords({ Entity: "Products", sort_order: "asc", per_page: 200, page: 1 })
@@ -156,7 +141,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess }) {
             input={<OutlinedInput label="Quote_Stage" />}
             MenuProps={MenuProps}
           >
-            {Quote_Stage.map((item) => (
+            {quote_stage_list.map((item) => (
               <MenuItem key={item} value={item}>
                 {item}
               </MenuItem>
