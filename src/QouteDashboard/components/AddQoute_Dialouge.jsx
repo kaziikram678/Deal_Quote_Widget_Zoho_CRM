@@ -16,10 +16,19 @@ import {
   FormControlLabel,
   Checkbox,
   Typography,
-  Box
-
+  Box,
+  IconButton,
+  Divider,
+  ListItemText,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -42,6 +51,8 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
   const [stage, setStage] = useState("");
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [validTill, setValidTill] = useState();
+  const [option, setOption] = React.useState([]);
 
 
 
@@ -62,6 +73,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     var recordData = {
       "Subject": subject,
       "Quote_Stage": stage,
+      "Valid_Till": validTill,
       "Deal_Name": {
         "id": DealId,
       },
@@ -83,6 +95,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     setStage("");
     onSuccess();
     setSelectedProducts([]);
+    setValidTill("");
   };
 
 
@@ -90,6 +103,12 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     (sum, p) => sum + p.quantity * p.list_price,
     0
   );
+
+  const removeSelectedItem = (index) => {
+    const updatedSelectedItem = selectedProducts.filter((item) => item.id != index)
+
+    setSelectedProducts(updatedSelectedItem);
+  }
 
   return (
     <>
@@ -110,10 +129,11 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
           />
 
 
-          <FormControl sx={{ my: 1, width: 500 }}>
+          <FormControl sx={{ my: 1, width: 550 }}>
             <InputLabel id="demo-multiple-name-label">
               Stage
             </InputLabel>
+
             <Select
               labelId="demo-multiple-name-label"
               id="demo-multiple-name"
@@ -132,7 +152,30 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ my: 1, width: 500 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={['DatePicker']}>
+              <DatePicker
+                disablePast
+                label="Valid_Till"
+                format="DD/MM/YYYY"
+                value={validTill}
+                onChange={(e) => setValidTill(e)}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+
+          {/* <TextField
+            fullWidth
+            type="date"
+            label="Valid_Till"
+            variant="standard"
+            value={validTill}
+            onChange={(e) => setValidTill(e.target.value)}
+          /> */}
+
+          <Divider sx={{ mb: 2 }} />
+
+          <FormControl sx={{ my: 1, width: 550 }}>
             <InputLabel>
               Select Products
             </InputLabel>
@@ -158,11 +201,19 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
               input={<OutlinedInput label="Select Products" />}
               MenuProps={MenuProps}
             >
-              {products.map((product) => (
-                <MenuItem key={product.id} value={product.id}>
-                  {product.Product_Name}
-                </MenuItem>
-              ))}
+              {products.map((product) => {
+                const selected = selectedProducts.includes(product);
+                const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
+                return (
+                  <MenuItem key={product.id} value={product.id}>
+                    <SelectionIcon
+                      fontSize="small"
+                      style={{ marginRight: 8, padding: 9, boxSizing: 'content-box' }}
+                    />
+                    <ListItemText primary={product.Product_Name} />
+                  </MenuItem>
+                )
+              })}
             </Select>
           </FormControl>
 
@@ -185,6 +236,10 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
                   }}
                 >
                 </TextField>
+
+                <IconButton onClick={() => removeSelectedItem(selectedProducts[index].id)}>
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             </Paper>
           ))}

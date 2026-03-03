@@ -15,9 +15,12 @@ import {
   MenuItem,
   Divider,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -40,6 +43,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
 
   const [open, setOpen] = React.useState(false);
   const [saving, setSaving] = useState(false);
+  const [validTill, setValidTill] = useState(quote.Valid_Till);
 
   ///////////////////////////Snakebar//////////////////////////
 
@@ -90,6 +94,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
         id: quote.id,
         Subject: subject,
         Quote_Stage: quoteStage,
+        Valid_Till: validTill,
         Product_Details: selectedProducts.map((product) => ({
           product: {
             id: product.id,
@@ -110,6 +115,12 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
     (sum, p) => sum + p.quantity * p.list_price,
     0
   );
+
+  const removeSelectedItem = (index) => {
+    const updatedSelectedItem = selectedProducts.filter((item) => item.id != index)
+
+    setSelectedProducts(updatedSelectedItem);
+  }
 
 
   return (
@@ -148,6 +159,18 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
             ))}
           </Select>
         </FormControl>
+
+        <TextField
+          fullWidth
+          type="date"
+          label="Valid_Till"
+          variant="standard"
+          value={validTill}
+          onChange={(e) => setValidTill(e.target.value)}
+        />
+
+        <Divider sx={{ mb: 2 }} />
+
 
         <FormControl sx={{ my: 1, width: 500 }}>
           <InputLabel>
@@ -202,6 +225,11 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
                 }}
               >
               </TextField>
+
+
+              <IconButton onClick={() => removeSelectedItem(selectedProducts[index].id)}>
+                <DeleteIcon />
+              </IconButton>
             </Box>
           </Paper>
         ))}

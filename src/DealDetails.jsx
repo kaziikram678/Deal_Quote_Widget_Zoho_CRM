@@ -46,9 +46,8 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
 
   const [stageList, setStageList] = useState([]);
 
-  const [selectedAccount, setSelectedAccount] = useState([]);
-
   const [accounts, setAccounts] = useState([]);
+
 
   const stage_list = stageList.toString().split(",");
 
@@ -92,21 +91,29 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
     });
   };
 
-  const getAccounts = async () => {
+  useEffect(() => {
     var conn_name = "ikram_connection_crm";
     var req_data = {
       "method": "GET",
       "url": "https://www.zohoapis.com/crm/v8/Accounts?fields=Account_Name",
       "param_type": 1
     };
-    await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
+    ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
       .then(function (data) {
-        //console.log(data.details.statusMessage.data);
-        setAccounts(data.details.data);
-      })
-  }
+        const account = data.details.statusMessage;
+        const rows = (account.data || []).map((item) => ({
+          id: item.id,
+          name: item.Account_Name
+        }));
 
-  //console.log(Account_Id);
+        setAccounts(rows);
+
+      })
+  }, [])
+
+
+  //console.log(accounts);
+  // console.log(formData.Account_Name);
 
   return (
     <>
@@ -138,6 +145,8 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
 
             <Divider sx={{ mb: 2 }} />
 
+            
+
             {loading ? (
               <Box display="flex" justifyContent="center" py={1}>
                 <CircularProgress />
@@ -167,7 +176,7 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                 <Divider sx={{ mb: 2 }} />
 
                 <Stack direction="row" spacing={2}>
-                  {/* <Button
+                  <Button
                     fullWidth
                     variant="outlined"
                     size="large"
@@ -191,30 +200,30 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                     aria-describedby="modal-modal-description"
                   >
                     <AccountDetails Account_Id={Account_Id}/>
-                  </Modal> */}
+                  </Modal>
 
                   <FormControl sx={{ my: 1, width: 960 }}>
                     <InputLabel id="demo-multiple-name-label">
-                      Stage
+                      Account_Name
                     </InputLabel>
                     <Select
                       labelId="demo-multiple-name-label"
                       id="demo-multiple-name"
-                      name="Stage"
-                      value={formData.Stage}
+                      name="Account_Name"
+                      value={formData.Account_Name}
                       onChange={handleChange}
-                      input={<OutlinedInput label="Name" />}
+                      input={<OutlinedInput label="Account_Name" />}
                       MenuProps={MenuProps}
                     >
-                      {stage_list.map((item) => (
-                        <MenuItem key={item} value={item}>
-                          {item}
+                      {accounts.map((item) => (
+                        <MenuItem key={item.id} value={item.name}>
+                          {item.name}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
 
-                  <Button
+                  {/* <Button
                     fullWidth
                     variant="outlined"
                     size="large"
@@ -229,7 +238,7 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
                     }}
                   >
                     {formData.Contact_Name}
-                  </Button>
+                  </Button> */}
                   {/* <Modal
                     open={modalOpen}
                     onClose={handleModalClose}

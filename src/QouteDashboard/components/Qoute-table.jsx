@@ -78,6 +78,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
       APIData: {
         id: DealId,
         Deal_Name: formData.Deal_Name,
+        Account_Name: formData.Account_Name,
         Amount: formData.Amount,
         Contact_Phone: formData.Contact_Phone,
         Stage: formData.Stage,
@@ -111,7 +112,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
       setSaving(false);
     });
 
-    //console.log(quote);
+    console.log(quote);
 
     const rows = (quote.data || []).map((item) => ({
       id: item.id,
@@ -139,9 +140,10 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
   };
 
   const columns = [
-    { field: "Subject", headerName: "Subject", width: 250 },
+    { field: "Subject", headerName: "Subject", width: 200 },
     { field: "Quote_Stage", headerName: "Stage", width: 150 },
-    { field: "Grand_Total", headerName: "Total", width: 150 },
+    { field: "Grand_Total", headerName: "Total", width: 100 },
+    { field: "Valid_Till", headerName: "Valid_Till", width: 100 },
     { field: "Products", headerName: "Products", width: 300 },
     {
       field: "actions",
