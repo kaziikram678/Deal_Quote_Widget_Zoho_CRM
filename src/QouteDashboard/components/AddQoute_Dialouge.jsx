@@ -20,6 +20,7 @@ import {
   IconButton,
   Divider,
   ListItemText,
+  Stack,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,6 +30,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -53,6 +56,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [validTill, setValidTill] = useState();
   const [option, setOption] = React.useState([]);
+  const [required, setRequired] = useState(false);
 
 
 
@@ -110,6 +114,22 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     setSelectedProducts(updatedSelectedItem);
   }
 
+  const increaseProductQuantity = (index) => {
+    const increase = selectedProducts.filter((item)=> 
+      item.id == index ? item.quantity+=1: item.quantity
+    )
+
+    setSelectedProducts(increase)
+  }
+
+  const decreaseProductQuantity=(index) =>{
+    const decrease = selectedProducts.filter((item)=> 
+      item.id == index ? item.quantity-=1: item.quantity
+    )
+
+    setSelectedProducts(decrease)
+  }
+
   return (
     <>
       <Button variant="contained" onClick={() => setOpen(true)}>
@@ -122,6 +142,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
         <DialogContent>
           <TextField
             fullWidth
+            required
             label="Subject"
             variant="standard"
             value={subject}
@@ -129,12 +150,13 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
           />
 
 
-          <FormControl sx={{ my: 1, width: 550 }}>
+          <FormControl required sx={{ my: 1, width: 550 }}>
             <InputLabel id="demo-multiple-name-label">
               Stage
             </InputLabel>
 
             <Select
+              required
               labelId="demo-multiple-name-label"
               id="demo-multiple-name"
               label="Quote_Stage"
@@ -155,6 +177,11 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={['DatePicker']}>
               <DatePicker
+                slotProps={{
+                  textField: {
+                    required: true,
+                  },
+                }}
                 disablePast
                 label="Valid_Till"
                 format="DD/MM/YYYY"
@@ -202,15 +229,10 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
               MenuProps={MenuProps}
             >
               {products.map((product) => {
-                const selected = selectedProducts.includes(product);
-                const SelectionIcon = selected ? CheckBoxIcon : CheckBoxOutlineBlankIcon;
+
                 return (
                   <MenuItem key={product.id} value={product.id}>
-                    <SelectionIcon
-                      fontSize="small"
-                      style={{ marginRight: 8, padding: 9, boxSizing: 'content-box' }}
-                    />
-                    <ListItemText primary={product.Product_Name} />
+                    {product.Product_Name}
                   </MenuItem>
                 )
               })}
@@ -224,7 +246,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
               <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
 
                 <TextField
-                  type="number"
+                  type="text"
                   fullWidth
                   label="Quantity"
                   variant="standard"
@@ -235,11 +257,24 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
                     setSelectedProducts(selected);
                   }}
                 >
+
                 </TextField>
 
-                <IconButton onClick={() => removeSelectedItem(selectedProducts[index].id)}>
-                  <DeleteIcon />
-                </IconButton>
+                <Stack direction="row" spacing={0.5}>
+                  <IconButton onClick={()=> increaseProductQuantity(selectedProducts[index].id)}>
+                    <AddIcon />
+                  </IconButton>
+
+                   <IconButton onClick={()=> decreaseProductQuantity(selectedProducts[index].id)}>
+                    <RemoveIcon />
+                  </IconButton>
+
+                  <IconButton onClick={() => removeSelectedItem(selectedProducts[index].id)}>
+                    <DeleteIcon />
+                  </IconButton>
+
+                </Stack>
+
               </Box>
             </Paper>
           ))}
@@ -255,7 +290,9 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreate}>Create</Button>
+          {(subject && stage && validTill && selectedProducts.length > 0) ? (
+            <Button onClick={handleCreate}>Create</Button>
+          ) : <Button disabled onClick={handleCreate}>Create</Button>}
         </DialogActions>
       </Dialog >
     </>

@@ -79,6 +79,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
         id: DealId,
         Deal_Name: formData.Deal_Name,
         Account_Name: formData.Account_Name,
+        Valid_Till: formData.Valid_Till,
         Amount: formData.Amount,
         Contact_Phone: formData.Contact_Phone,
         Stage: formData.Stage,
@@ -112,7 +113,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
       setSaving(false);
     });
 
-    console.log(quote);
+    //console.log(quote);
 
     const rows = (quote.data || []).map((item) => ({
       id: item.id,
@@ -199,7 +200,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
                 rows={quotes}
                 columns={columns}
                 disableRowSelectionOnClick
-                pageSizeOptions={[5, 10]}
+                pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
               />
             </Paper>
 

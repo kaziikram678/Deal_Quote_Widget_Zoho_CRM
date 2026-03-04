@@ -20,6 +20,12 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 
 const ITEM_HEIGHT = 48;
@@ -36,6 +42,7 @@ const MenuProps = {
 const ZOHO = window.ZOHO;
 
 export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_list }) {
+  //console.log(quote.Valid_Till)
   const [subject, setSubject] = useState(quote.Subject);
   const [quoteStage, setQuoteStage] = useState(quote.Quote_Stage);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -44,6 +51,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
   const [open, setOpen] = React.useState(false);
   const [saving, setSaving] = useState(false);
   const [validTill, setValidTill] = useState(quote.Valid_Till);
+  const [isChange, setIsChange] = useState(false);
 
   ///////////////////////////Snakebar//////////////////////////
 
@@ -67,7 +75,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
   }, [onSuccess]);
 
   const getProductDetails = () => {
-    console.log(quote.Products_details);
+    //console.log(quote.Products_details);
 
     const selected = quote.Products_details.map((item) => {
       return {
@@ -78,7 +86,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
       }
     })
 
-    console.log(selected);
+    //console.log(selected);
 
     setSelectedProducts(selected)
   }
@@ -109,6 +117,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
 
     onClose();
     onSuccess();
+    setValidTill("");
   };
 
   const grandTotal = selectedProducts.reduce(
@@ -129,11 +138,17 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
 
       <DialogContent>
         <TextField
+          required
           fullWidth
           label="Subject"
           variant="standard"
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          onChange={
+            (e) => {
+              setSubject(e.target.value);
+              setIsChange(true)
+            }
+          }
         />
 
         <Divider sx={{ mb: 2 }} />
@@ -148,7 +163,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
             label="Quote_Stage"
             name="Stage"
             value={quoteStage}
-            onChange={(e) => setQuoteStage(e.target.value)}
+            onChange={(e) => { setQuoteStage(e.target.value); setIsChange(true) }}
             input={<OutlinedInput label="Quote_Stage" />}
             MenuProps={MenuProps}
           >
@@ -160,17 +175,29 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
           </Select>
         </FormControl>
 
+        {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DemoContainer components={['DatePicker']}>
+            <DatePicker
+              disablePast
+              label="Valid_Till"
+              format="DD/MM/YYYY"
+              value={validTill}
+              onChange={(e) => setValidTill(e)}
+            />
+          </DemoContainer>
+        </LocalizationProvider> */}
+
         <TextField
           fullWidth
           type="date"
           label="Valid_Till"
           variant="standard"
           value={validTill}
-          onChange={(e) => setValidTill(e.target.value)}
+          onChange={(e) => { setValidTill(e.target.value); setIsChange(true) }}
         />
 
-        <Divider sx={{ mb: 2 }} />
 
+        <Divider sx={{ mb: 2 }} />
 
         <FormControl sx={{ my: 1, width: 500 }}>
           <InputLabel>
@@ -194,6 +221,7 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
               });
 
               setSelectedProducts(selected);
+              setIsChange(true)
             }}
             input={<OutlinedInput label="Select Products" />}
             MenuProps={MenuProps}
@@ -245,7 +273,8 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleUpdate}>Save</Button>
+        {isChange || (subject !== quote.Subject && quoteStage !== quote.Quote_Stage && validTill !== quote.Valid_Till) ? <Button onClick={handleUpdate}>Save</Button> : <Button disabled onClick={handleUpdate}>Save</Button>}
+
       </DialogActions>
     </Dialog>
   );
