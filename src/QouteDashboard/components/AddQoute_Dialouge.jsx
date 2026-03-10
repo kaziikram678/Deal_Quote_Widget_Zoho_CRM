@@ -32,6 +32,8 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import dayjs from 'dayjs';
+
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -64,7 +66,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     const product = await ZOHO.CRM.API.getAllRecords({ Entity: "Products", sort_order: "asc", per_page: 200, page: 1 })
       .then(function (data) {
         //console.log(data)
-        setProducts(data.data);
+        setProducts(data.data); 
       })
   };
 
@@ -99,7 +101,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
     setStage("");
     onSuccess();
     setSelectedProducts([]);
-    setValidTill("");
+    setValidTill();
   };
 
 
@@ -174,31 +176,33 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
             </Select>
           </FormControl>
 
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={['DatePicker']}>
               <DatePicker
                 slotProps={{
                   textField: {
                     required: true,
+                    type: Date
                   },
                 }}
-                disablePast
+                //disablePast
                 label="Valid_Till"
-                format="DD/MM/YYYY"
+                //format="DD/MM/YYYY"
                 value={validTill}
                 onChange={(e) => setValidTill(e)}
               />
             </DemoContainer>
-          </LocalizationProvider>
+          </LocalizationProvider> */}
 
-          {/* <TextField
+          <TextField
             fullWidth
             type="date"
             label="Valid_Till"
             variant="standard"
+            defaultValue={dayjs().day}
             value={validTill}
             onChange={(e) => setValidTill(e.target.value)}
-          /> */}
+          />
 
           <Divider sx={{ mb: 2 }} />
 
@@ -222,7 +226,7 @@ export default function AddQuote({ DealId, onSuccess, quote_stage_list }) {
                     list_price: product.Unit_Price
                   };
                 });
-
+                
                 setSelectedProducts(selected);
               }}
               input={<OutlinedInput label="Select Products" />}

@@ -26,6 +26,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 
 const ITEM_HEIGHT = 48;
@@ -131,6 +133,23 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
     setSelectedProducts(updatedSelectedItem);
   }
 
+  const increaseProductQuantity = (index) => {
+    const increase = selectedProducts.filter((item) =>
+      item.id == index ? item.quantity += 1 : item.quantity
+    )
+
+    setSelectedProducts(increase)
+  }
+
+  const decreaseProductQuantity = (index) => {
+    const decrease = selectedProducts.filter((item) =>
+      item.id == index ? item.quantity -= 1 : item.quantity
+    )
+
+    setSelectedProducts(decrease)
+  }
+
+
 
   return (
     <Dialog open onClose={onClose}>
@@ -187,14 +206,14 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
           </DemoContainer>
         </LocalizationProvider> */}
 
-        <TextField
+        {/* <TextField
           fullWidth
           type="date"
           label="Valid_Till"
           variant="standard"
           value={validTill}
           onChange={(e) => { setValidTill(e.target.value); setIsChange(true) }}
-        />
+        /> */}
 
 
         <Divider sx={{ mb: 2 }} />
@@ -253,6 +272,15 @@ export default function UpdateDialog({ quote, onClose, onSuccess, quote_stage_li
                 }}
               >
               </TextField>
+
+              <IconButton onClick={() => increaseProductQuantity(selectedProducts[index].id)}>
+                <AddIcon />
+              </IconButton>
+
+              <IconButton onClick={() => decreaseProductQuantity(selectedProducts[index].id)}>
+                <RemoveIcon />
+              </IconButton>
+
 
 
               <IconButton onClick={() => removeSelectedItem(selectedProducts[index].id)}>

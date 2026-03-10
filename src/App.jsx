@@ -10,6 +10,7 @@ import MenuAppBar from './QouteDashboard/components/Dashboard-header';
 import QuoteTable from './QouteDashboard/components/Qoute-table';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
 import AddQuote from './QouteDashboard/components/AddQoute_Dialouge';
+import AddQuoteTest2 from './QouteDashboard/components/AddQuoteTest2';
 const darkTheme = createTheme({
   palette: { mode: "dark" },
 });
@@ -33,7 +34,7 @@ export default function App() {
       });
       setModuleName(data.Entity);
       setEntityId(data.EntityId[0]);
-     // console.log(data);
+      // console.log(data);
       setZohoLoaded(true);
     });
 
@@ -84,12 +85,15 @@ export default function App() {
     return <>Fetching Data. Please wait...</>
   }
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <DealDetails DealId={entityId} moduleName={moduleName} formDataList = {formDataList} loading={loading}  Account_Id={formDataList.Account_Id} Contact_Id={formDataList.Contact_Id}/>
+    //<ThemeProvider theme={""}>
+    //<CssBaseline />
+    <>
+      <DealDetails DealId={entityId} moduleName={moduleName} formDataList={formDataList} loading={loading} Account_Id={formDataList.Account_Id} Contact_Id={formDataList.Contact_Id} />
       <MenuAppBar>
-        <AddQuote DealId={entityId} onSuccess={() => { }} />
+        <AddQuoteTest2 DealId={entityId} onSuccess={() => { }} />
       </MenuAppBar>
-    </ThemeProvider>
+    </>
+
+    //</ThemeProvider>
   );
 }

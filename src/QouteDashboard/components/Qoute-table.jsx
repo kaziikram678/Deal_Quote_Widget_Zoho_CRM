@@ -17,21 +17,33 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import { darken, lighten, styled } from '@mui/material/styles';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import { useDemoData } from '@mui/x-data-grid-generator';
+import AddQuoteTest2 from "./AddQuoteTest2";
+import EditQuoteTest from "./EditQuoteTest";
+
 
 const ZOHO = window.ZOHO;
 
-export default function QuoteTable({ DealId, moduleName, formDataList, loading}) {
+
+export default function QuoteTable({ DealId, moduleName, formDataList, loading }) {
   const [quotes, setQuotes] = useState([]);
   const [editQuote, setEditQuote] = useState(null);
   const [saving, setSaving] = useState(false);
   const [quoteSaving, setQuoteSaving] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [openOnSuccess, setOpenOnSuccess] = React.useState(false);
+  const [openOnError, setOpenOnError] = React.useState(false);
   const [quoteStageList, setQuoteStageList] = useState([])
   const [formData, setformData] = useState({});
+  const [iserror, setIsError] = useState(false);
+  const [updatedDeal, setUpdatedDeal] = useState();
+
 
   const quote_stage_list = quoteStageList.toString().split(",");
 
-  // console.log(formDataList)
+  //console.log(formDataList)
 
   // console.log(formData);
   useEffect(() => {
@@ -40,30 +52,40 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
 
   ///////////////////////////Snakebar//////////////////////////
 
-  const handleClose = (event, reason) => {
+  const handleCloseOnSuccess = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setOpen(false);
+
+    setOpenOnSuccess(false);
+
+
+  };
+
+  const handleCloseOnError = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenOnError(false);
   };
 
   /////////////////////GetQuoteStage/////////////////////////////
 
   useEffect(() => {
-      var func_name = "qoute_stage_for_widget";
-      var req_data = {
-        "arguments": JSON.stringify({
-        })
-      };
-      ZOHO.CRM.FUNCTIONS.execute(func_name, req_data)
-        .then(function (data) {
-          //console.log(data);
-          setQuoteStageList(data.details.output);
-        })
-    }, [quoteStageList])
+    var func_name = "qoute_stage_for_widget";
+    var req_data = {
+      "arguments": JSON.stringify({
+      })
+    };
+    ZOHO.CRM.FUNCTIONS.execute(func_name, req_data)
+      .then(function (data) {
+        //console.log(data);
+        setQuoteStageList(data.details.output);
+      })
+  }, [quoteStageList])
 
-    ///console.log(quoteStageList);
-  
+  ///console.log(quoteStageList);
+
 
   ////////////////////////////Quote Update////////////////////////
   // console.log(formData.Contact_Name);
@@ -71,8 +93,9 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
 
   const handleQuoteUpdate = async () => {
     setQuoteSaving(true);
-    setOpen(true);
-    console.log(formData.Contact_Name);
+    setOpenOnSuccess(true);
+    setOpenOnError(true);
+    // console.log(formData.Contact_Name);
     const config = {
       Entity: moduleName,
       APIData: {
@@ -87,19 +110,17 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
     };
 
     await ZOHO.CRM.API.updateRecord(config)
-      .then(function () {
-        setQuoteSaving(false);
+      .then(function (res) {
+        console.log(res);
+        //console.log(res.data[0].status);
+        //return res;
       })
-      .catch(() => {
-        setQuoteSaving(false);
-      });
-
-    await ZOHO.CRM.UI.Popup.closeReload()
-      .then(function (data) {
-        console.log(data)
-      })
-
+    // {!error ?  alert(""): await ZOHO.CRM.UI.Popup.closeReload()
+    // .then(function (data) {
+    //   console.log(data)
+    // })} 
   };
+
 
 
   const getQuotes = async () => {
@@ -126,7 +147,9 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
     }));
 
     setQuotes(rows);
+
   };
+
 
   useEffect(() => {
     getQuotes();
@@ -140,109 +163,138 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading})
     getQuotes();
   };
 
-  const columns = [
-    { field: "Subject", headerName: "Subject", width: 200 },
-    { field: "Quote_Stage", headerName: "Stage", width: 150 },
-    { field: "Grand_Total", headerName: "Total", width: 100 },
-    { field: "Valid_Till", headerName: "Valid_Till", width: 100 },
-    { field: "Products", headerName: "Products", width: 300 },
-    {
-      field: "actions",
-      headerName: "Action",
-      width: 150,
-      sortable: false,
-      renderCell: (params) => (
-        <Box>
-          <IconButton onClick={() => setEditQuote(params.row)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => handleDelete(params.row.id)}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
+  const handleRowClick = async (id) => {
+    //console.log(id.id)
+    const quoteId = id.id;
 
-  return (
-    <>
-      <Box
+    return (
+      <a href=`https://crm.zoho.com/crm/org902039596/tab/Quotes/${quoteId}`, target = "_blank" > Open Quote </a >
+    )
+}
+
+
+
+const columns = [
+  { field: "Subject", headerName: "Subject", width: 200 },
+  { field: "Quote_Stage", headerName: "Stage", width: 150 },
+  { field: "Grand_Total", headerName: "Total", width: 100 },
+  { field: "Valid_Till", headerName: "Valid_Till", width: 100 },
+  { field: "Products", headerName: "Products", width: 300 },
+  {
+    field: "actions",
+    headerName: "Action",
+    width: 150,
+    sortable: false,
+    renderCell: (params) => (
+      <Box>
+        <IconButton onClick={() => setEditQuote(params.row)}>
+          <EditIcon />
+        </IconButton>
+        <IconButton onClick={() => handleDelete(params.row.id)}>
+          <DeleteIcon />
+        </IconButton>
+      </Box>
+    ),
+  },
+];
+
+return (
+  <>
+    <Box
+      sx={{
+        minHeight: "50vh",
+        // display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f4f6f8",
+        p: 2,
+      }}
+    >
+      <Card
+        elevation={4}
         sx={{
-          minHeight: "50vh",
-          // display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f4f6f8",
-          p: 2,
+          width: 1000,
+          borderRadius: 3,
         }}
       >
-        <Card
-          elevation={4}
-          sx={{
-            width: 1000,
-            borderRadius: 3,
-          }}
-        >
-          <CardContent>
-            <Box
+        <CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mb: 1,
+            }}
+          >
+            <Typography variant="h6">Related Quotes</Typography>
+            <AddQuoteTest2 DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} />
+          </Box>
+
+          <Paper sx={{ height: 420 }}>
+            <DataGrid
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 1,
+                boxShadow: 2,
+                border: 2,
+                borderColor: 'primary.light',
+                '& .MuiDataGrid-cell:hover': {
+                  color: 'primary.main',
+                },
+              }}
+              rows={quotes}
+              columns={columns}
+              onRowClick={(id) => handleRowClick(id)}
+              disableRowSelectionOnClick
+              pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
+            />
+          </Paper>
+
+          <Box mt={1}>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              onClick={handleQuoteUpdate}
+              //disabled={quoteSaving}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2,
+                py: 1.2,
               }}
             >
-              <Typography variant="h6">Related Quotes</Typography>
-              <AddQuote DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} />
-            </Box>
-
-            <Paper sx={{ height: 420 }}>
-              <DataGrid
-                rows={quotes}
-                columns={columns}
-                disableRowSelectionOnClick
-                pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
+              {!iserror ? <Snackbar
+                open={openOnSuccess}
+                autoHideDuration={3000}
+                onClose={handleCloseOnSuccess}
+                message="Deal Updated Successfully"
+              /> : <Snackbar
+                open={openOnError}
+                autoHideDuration={3000}
+                onClose={handleCloseOnError}
+                message="Invalid Data"
               />
-            </Paper>
+              }
 
-            <Box mt={1}>
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                onClick={handleQuoteUpdate}
-                disabled={quoteSaving}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: 2,
-                  py: 1.2,
-                }}
-              >
-                <Snackbar
-                  open={open}
-                  autoHideDuration={6000}
-                  onClose={handleClose}
-                  message="Deal Updated Successfully"
-                />
-                {quoteSaving ? (
+              Save Changes
+
+              {/* {quoteSaving ? (
                   <CircularProgress size={22} color="inherit" />
                 ) : (
                   "Save Changes"
-                )}
-              </Button>
-            </Box>
+                )} */}
+            </Button>
+          </Box>
 
-            {editQuote && (
-              <UpdateDialog
-                quote={editQuote}
-                onClose={() => setEditQuote(null)}
-                onSuccess={getQuotes}
-                quote_stage_list={quote_stage_list}
-              />
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-    </>
-  );
+          {editQuote && (
+            <EditQuoteTest
+              quote={editQuote}
+              onClose={() => setEditQuote(null)}
+              onSuccess={getQuotes}
+              quote_stage_list={quote_stage_list}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </Box>
+  </>
+);
 }
 
