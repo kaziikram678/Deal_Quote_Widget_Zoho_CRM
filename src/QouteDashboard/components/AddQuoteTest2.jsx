@@ -37,6 +37,8 @@ export default function AddQuoteTest2({ DealId, onSuccess, quote_stage_list }) {
 
     const [iserror, setIsError] = useState(false);
 
+    const [isProductSelected, setIsProductSelected] = useState(false)
+
 
     const [lineItems, setLineItems] = useState([
         { productId: "", name: "", quantity: 1, price: 0 }
@@ -108,6 +110,8 @@ export default function AddQuoteTest2({ DealId, onSuccess, quote_stage_list }) {
         };
 
         setLineItems(updated);
+        setIsProductSelected(true)
+        
     };
 
 
@@ -292,7 +296,7 @@ export default function AddQuoteTest2({ DealId, onSuccess, quote_stage_list }) {
                     </Button> */}
 
 
-                    {(subject && stage &&  lineItems.length > 0) ? (
+                    {(subject && stage &&  isProductSelected ) ? (
                         <Button
                         variant="contained"
                         size="large"

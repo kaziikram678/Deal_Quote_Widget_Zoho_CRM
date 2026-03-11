@@ -22,6 +22,7 @@ import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import AccountDetails from "./QouteDashboard/components/AccountDetails";
 import ContactDetails from "./QouteDashboard/components/ContactDetails";
 import Modal from '@mui/material/Modal';
+import { Subform } from "./Subform/Subform";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -253,7 +254,7 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
 
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    type="mobile"
+                    type="phone"
                     fullWidth
                     label="Contact_Phone"
                     name="Contact_Phone"

@@ -11,9 +11,16 @@ import QuoteTable from './QouteDashboard/components/Qoute-table';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
 import AddQuote from './QouteDashboard/components/AddQoute_Dialouge';
 import AddQuoteTest2 from './QouteDashboard/components/AddQuoteTest2';
+import Subform from './Subform/Subform';
+
+
+
+
+
 const darkTheme = createTheme({
   palette: { mode: "dark" },
 });
+
 
 const ZOHO = window.ZOHO;
 
@@ -51,6 +58,7 @@ export default function App() {
     Contact_Phone: 0,
     Contact_Id: "",
     Stage: [],
+    Deal_Transactions: [],
   });
 
   useEffect(() => {
@@ -61,7 +69,7 @@ export default function App() {
       })
         .then(function (response) {
           const deal = response.data[0];
-          //console.log(deal.Contact_Name.id);
+          //console.log(deal.Deal_Transactions);
           setformDataList({
             Deal_Name: deal.Deal_Name,
             Amount: deal.Amount,
@@ -71,6 +79,7 @@ export default function App() {
             Contact_Id: deal.Contact_Name.id,
             Contact_Phone: deal.Contact_Phone,
             Stage: deal.Stage,
+            Deal_Transactions: deal.Deal_Transactions
           });
 
           setLoading(false);
@@ -92,6 +101,7 @@ export default function App() {
       <MenuAppBar>
         <AddQuoteTest2 DealId={entityId} onSuccess={() => { }} />
       </MenuAppBar>
+      <Subform DealId={entityId} Deal_Transactions={formDataList.Deal_Transactions}/>
     </>
 
     //</ThemeProvider>

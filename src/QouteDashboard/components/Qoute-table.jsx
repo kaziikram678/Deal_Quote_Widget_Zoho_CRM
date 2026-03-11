@@ -5,27 +5,20 @@ import {
   Typography,
   IconButton,
   Button,
-  CircularProgress,
   Snackbar,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useEffect, useState } from "react";
-import UpdateDialog from "./EditQoute-diaog"
-import AddQuote from "./AddQoute_Dialouge";
 import {
   Card,
   CardContent,
 } from "@mui/material";
-import { darken, lighten, styled } from '@mui/material/styles';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
-import { useDemoData } from '@mui/x-data-grid-generator';
 import AddQuoteTest2 from "./AddQuoteTest2";
 import EditQuoteTest from "./EditQuoteTest";
 
-
 const ZOHO = window.ZOHO;
+
 
 
 export default function QuoteTable({ DealId, moduleName, formDataList, loading }) {
@@ -37,8 +30,7 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
   const [openOnError, setOpenOnError] = React.useState(false);
   const [quoteStageList, setQuoteStageList] = useState([])
   const [formData, setformData] = useState({});
-  const [iserror, setIsError] = useState(false);
-  const [updatedDeal, setUpdatedDeal] = useState();
+  const [response, setResponse] = useState("");
 
 
   const quote_stage_list = quoteStageList.toString().split(",");
@@ -49,6 +41,8 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
   useEffect(() => {
     setformData(formDataList)
   }, [formDataList])
+
+
 
   ///////////////////////////Snakebar//////////////////////////
 
@@ -111,17 +105,16 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
 
     await ZOHO.CRM.API.updateRecord(config)
       .then(function (res) {
-        console.log(res);
+        console.log(res.data[0].status);
         //console.log(res.data[0].status);
         //return res;
+        setResponse(res.data[0].status);
       })
     // {!error ?  alert(""): await ZOHO.CRM.UI.Popup.closeReload()
     // .then(function (data) {
     //   console.log(data)
     // })} 
   };
-
-
 
   const getQuotes = async () => {
     const quote = await ZOHO.CRM.API.getRelatedRecords({
@@ -163,138 +156,137 @@ export default function QuoteTable({ DealId, moduleName, formDataList, loading }
     getQuotes();
   };
 
-  const handleRowClick = async (id) => {
-    //console.log(id.id)
-    const quoteId = id.id;
 
-    return (
-      <a href=`https://crm.zoho.com/crm/org902039596/tab/Quotes/${quoteId}`, target = "_blank" > Open Quote </a >
-    )
-}
+  const ExternalLink = (quoteId, subject) => (
+    //console.log(quoteId)
+    <a href={`https://crm.zoho.com/crm/org902039596/tab/Quotes/${quoteId}`} target="_blank" rel="noopener noreferrer">
+      {subject}
+    </a>
 
+  );
 
+  const columns = [
+    {
+      field: "Subject", headerName: "Subject", width: 200,
+      renderCell: (params) => (
+        ExternalLink(params.row.id, params.row.Subject)
+        )
+    },
+    { field: "Quote_Stage", headerName: "Stage", width: 150 },
+    { field: "Grand_Total", headerName: "Total", width: 100 },
+    { field: "Valid_Till", headerName: "Valid_Till", width: 100 },
+    { field: "Products", headerName: "Products", width: 300 },
+    {
+      field: "actions",
+      headerName: "Action",
+      width: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <Box>
+          <IconButton onClick={() => setEditQuote(params.row)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
 
-const columns = [
-  { field: "Subject", headerName: "Subject", width: 200 },
-  { field: "Quote_Stage", headerName: "Stage", width: 150 },
-  { field: "Grand_Total", headerName: "Total", width: 100 },
-  { field: "Valid_Till", headerName: "Valid_Till", width: 100 },
-  { field: "Products", headerName: "Products", width: 300 },
-  {
-    field: "actions",
-    headerName: "Action",
-    width: 150,
-    sortable: false,
-    renderCell: (params) => (
-      <Box>
-        <IconButton onClick={() => setEditQuote(params.row)}>
-          <EditIcon />
-        </IconButton>
-        <IconButton onClick={() => handleDelete(params.row.id)}>
-          <DeleteIcon />
-        </IconButton>
-      </Box>
-    ),
-  },
-];
-
-return (
-  <>
-    <Box
-      sx={{
-        minHeight: "50vh",
-        // display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#f4f6f8",
-        p: 2,
-      }}
-    >
-      <Card
-        elevation={4}
+  return (
+    <>
+      <Box
         sx={{
-          width: 1000,
-          borderRadius: 3,
+          minHeight: "50vh",
+          // display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f4f6f8",
+          p: 2,
         }}
       >
-        <CardContent>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 1,
-            }}
-          >
-            <Typography variant="h6">Related Quotes</Typography>
-            <AddQuoteTest2 DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} />
-          </Box>
-
-          <Paper sx={{ height: 420 }}>
-            <DataGrid
+        <Card
+          elevation={4}
+          sx={{
+            width: 1000,
+            borderRadius: 3,
+          }}
+        >
+          <CardContent>
+            <Box
               sx={{
-                boxShadow: 2,
-                border: 2,
-                borderColor: 'primary.light',
-                '& .MuiDataGrid-cell:hover': {
-                  color: 'primary.main',
-                },
-              }}
-              rows={quotes}
-              columns={columns}
-              onRowClick={(id) => handleRowClick(id)}
-              disableRowSelectionOnClick
-              pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
-            />
-          </Paper>
-
-          <Box mt={1}>
-            <Button
-              fullWidth
-              variant="contained"
-              size="large"
-              onClick={handleQuoteUpdate}
-              //disabled={quoteSaving}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                py: 1.2,
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 1,
               }}
             >
-              {!iserror ? <Snackbar
-                open={openOnSuccess}
-                autoHideDuration={3000}
-                onClose={handleCloseOnSuccess}
-                message="Deal Updated Successfully"
-              /> : <Snackbar
-                open={openOnError}
-                autoHideDuration={3000}
-                onClose={handleCloseOnError}
-                message="Invalid Data"
+              <Typography variant="h6">Related Quotes</Typography>
+              <AddQuoteTest2 DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} />
+            </Box>
+
+            <Paper sx={{ height: 420 }}>
+              <DataGrid
+                sx={{
+                  boxShadow: 2,
+                  border: 2,
+                  borderColor: 'primary.light',
+                  '& .MuiDataGrid-cell:hover': {
+                    color: 'primary.main',
+                  },
+                }}
+                rows={quotes}
+                columns={columns}
+                //onRowClick={(id) => handleRowClick(id)}
+                hideFooterSelectedRowCount
+                // disableRowSelectionOnClick
+                pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
               />
-              }
+            </Paper>
 
-              Save Changes
+            <Box mt={1}>
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                onClick={handleQuoteUpdate}
+                //disabled={quoteSaving}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  py: 1.2,
+                }}
+              >
+                {response == "success" ? <Snackbar
+                  open={openOnSuccess}
+                  autoHideDuration={3000}
+                  onClose={handleCloseOnSuccess}
+                  message="Deal Updated Successfully"
+                /> :
+                  <Snackbar
+                    open={openOnError}
+                    autoHideDuration={3000}
+                    onClose={handleCloseOnError}
+                    message="Invalid Data"
+                  /> 
+                }
 
-              {/* {quoteSaving ? (
-                  <CircularProgress size={22} color="inherit" />
-                ) : (
-                  "Save Changes"
-                )} */}
-            </Button>
-          </Box>
+                Save Changes
+              </Button>
+            </Box>
 
-          {editQuote && (
-            <EditQuoteTest
-              quote={editQuote}
-              onClose={() => setEditQuote(null)}
-              onSuccess={getQuotes}
-              quote_stage_list={quote_stage_list}
-            />
-          )}
-        </CardContent>
-      </Card>
-    </Box>
-  </>
-);
+            {editQuote && (
+              <EditQuoteTest
+                quote={editQuote}
+                onClose={() => setEditQuote(null)}
+                onSuccess={getQuotes}
+                quote_stage_list={quote_stage_list}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+    </>
+  );
 }
 
