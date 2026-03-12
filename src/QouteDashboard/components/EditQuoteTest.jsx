@@ -44,7 +44,7 @@ const MenuProps = {
 const ZOHO = window.ZOHO;
 
 export default function EditQuoteTest({ quote, onClose, onSuccess, quote_stage_list }) {
-    console.log(quote.Valid_Till)
+    //console.log(quote.Valid_Till)
     const [subject, setSubject] = useState(quote.Subject);
     const [quoteStage, setQuoteStage] = useState(quote.Quote_Stage);
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -96,7 +96,7 @@ export default function EditQuoteTest({ quote, onClose, onSuccess, quote_stage_l
         setLineItems(selected)
     }
 
-    console.log(lineItems)
+    //console.log(lineItems)
 
     useEffect(() => {
         getProductDetails();

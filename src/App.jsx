@@ -16,7 +16,6 @@ import Subform from './Subform/Subform';
 
 
 
-
 const darkTheme = createTheme({
   palette: { mode: "dark" },
 });
@@ -69,7 +68,7 @@ export default function App() {
       })
         .then(function (response) {
           const deal = response.data[0];
-          //console.log(deal.Deal_Transactions);
+          console.log(deal);
           setformDataList({
             Deal_Name: deal.Deal_Name,
             Amount: deal.Amount,
