@@ -161,7 +161,6 @@ export default function AddQuoteTest2({ DealId, onSuccess, quote_stage_list }) {
         setLineItems([{ productId: "", name: "", quantity: 1, price: 0 }]);
         setSubject("");
         setStage("");
-
         onSuccess();
     };
 
@@ -176,8 +175,6 @@ export default function AddQuoteTest2({ DealId, onSuccess, quote_stage_list }) {
                 <DialogTitle>Create Quote</DialogTitle>
 
                 <DialogContent>
-
-
                     <TextField
                         required
                         fullWidth

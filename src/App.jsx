@@ -6,12 +6,9 @@ import { LeadSearch } from './LeadSearch';
 import React, { useEffect, useState, useReducer } from "react";
 import UpdateLeadData from './UpdateLeadData';
 import DealDetails from './DealDetails';
-import MenuAppBar from './QouteDashboard/components/Dashboard-header';
-import QuoteTable from './QouteDashboard/components/Qoute-table';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
-import AddQuote from './QouteDashboard/components/AddQoute_Dialouge';
-import AddQuoteTest2 from './QouteDashboard/components/AddQuoteTest2';
 import Subform from './Subform/Subform';
+import AddSubformData from './Subform/AddSubformData';
 
 
 
@@ -97,9 +94,6 @@ export default function App() {
     //<CssBaseline />
     <>
       <DealDetails DealId={entityId} moduleName={moduleName} formDataList={formDataList} loading={loading} Account_Id={formDataList.Account_Id} Contact_Id={formDataList.Contact_Id} />
-      <MenuAppBar>
-        <AddQuoteTest2 DealId={entityId} onSuccess={() => { }} />
-      </MenuAppBar>
       <Subform DealId={entityId} Deal_Transactions={formDataList.Deal_Transactions}/>
     </>
 

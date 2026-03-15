@@ -18,12 +18,14 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import AddSubformData from "./AddSubformData";
+import EditSubformData from "./EditSubformData";
 
 const ZOHO = window.ZOHO
 
-export default function Subform({ DealId, Deal_Transactions }) {
+export default function Subform({ DealId }) {
 
-  console.log(Deal_Transactions)
+  // console.log(Deal_Transactions)
 
   const [quotes, setQuotes] = useState([]);
   const [editDealTran, setEditQuote] = useState(null);
@@ -32,93 +34,60 @@ export default function Subform({ DealId, Deal_Transactions }) {
 
   const [dealTransactions, setDealTransactions] = useState([]);
 
-  const [deleteTransaction, setDeleteTransaction] = useState(dealTransactions);
+  const [editSubform, setEditSubform] = useState();
 
-  
+  const getDealTransactions = async () => {
+    await ZOHO.CRM.API.getRecord({
+      Entity: "Deals",
+      RecordID: DealId,
+    })
+      .then(function (response) {
+        const deal = response.data[0].Deal_Transactions;
+        console.log(deal)
+        const rows = (deal || []).map((item) => ({
+          id: item.id,
+          Transaction_Name: item.Transaction_Name,
+          Email: item.Email,
+          Transaction_Amount: item.Transaction_Amount,
+          Transaction_Date: item.Transaction_Date
+        }));
 
-  const getDealTransactions = () => {
-    const rows = (Deal_Transactions).map((item) => ({
-      id: item.id,
-      Transaction_Name: item.Transaction_Name,
-      Email: item.Email,
-      Transaction_Amount: item.Transaction_Amount,
-      Transaction_Date: item.Transaction_Date,
-    }));
-
-    setDealTransactions(rows);
-
-  }
+        setDealTransactions(rows);
+      })
+  };
 
   useEffect(() => {
     getDealTransactions();
-  }, [Deal_Transactions]);
-
-  const addRow = () => {
-
-    return (
-      <Dialog maxWidth="md" fullWidth>
-
-        <DialogTitle>Create Quote</DialogTitle>
-
-        <DialogContent>
-          <TextField
-            required
-            fullWidth
-            label="Subject"
-            variant="standard"
-            value={""}
-            onChange={(e) => ""}
-            sx={{ mb: 3 }}
-          />
-
-        </DialogContent>
-
-      </Dialog>
-    )
-
-  }
-
-
-
+  }, [DealId]);
 
 
   const handleDelete = async (id) => {
-    const deleteItem = dealTransactions.filter((item) => item.id != id);
 
-    // setDealTransactions(deleteItem)
+    const dealTransactionsAfterDelete = dealTransactions.filter((item) => item.id != id)
 
-    setDeleteTransaction(deleteItem)
+    console.log(dealTransactionsAfterDelete);
+    //setDealTransactions(dealTransactionsAfterDelete);
 
-  
-    console.log(deleteTransaction)
-
-    updateAfterDeletion();
-  };
-
-
-  const updateAfterDeletion = async () => {
-    console.log(deleteTransaction)
-    setDealTransactions(deleteTransaction)
-    var config = {
+    const config = {
       Entity: "Deals",
       APIData: {
-        "id": DealId,
-        "Deal_Transactions": dealTransactions
+        id: DealId,
+        Deal_Transactions: [dealTransactionsAfterDelete]
       },
-    }
+    };
+
     await ZOHO.CRM.API.updateRecord(config)
-      .then(function (data) {
-        console.log(data)
+      .then(function (res) {
+        console.log(res.data[0].status);
       })
 
-      console.log(dealTransactions)
-
-      //getDealTransactions()
+    //setDealTransactions();
+    setOpen(false);
+    onSuccess()
+    onClose()
   }
 
   console.log(dealTransactions)
-
-
   const columns = [
     { field: "Transaction_Name", headerName: "Transaction_Name", width: 200 },
     { field: "Email", headerName: "Email", width: 200 },
@@ -131,7 +100,7 @@ export default function Subform({ DealId, Deal_Transactions }) {
       sortable: false,
       renderCell: (params) => (
         <Box>
-          <IconButton onClick={() => setEditQuote(params.row)}>
+          <IconButton onClick={() => setEditSubform(params.row)}>
             <EditIcon />
           </IconButton>
           <IconButton onClick={() => handleDelete(params.row.id)}>
@@ -170,10 +139,7 @@ export default function Subform({ DealId, Deal_Transactions }) {
               }}
             >
               <Typography variant="h6">Deal Transactions</Typography>
-              <Button variant="contained" onClick={addRow}>
-                + Add New Row
-              </Button>
-              {/* <AddQuoteTest2 DealId={DealId} onSuccess={getQuotes} quote_stage_list={quote_stage_list} /> */}
+              <AddSubformData DealId={DealId} onSuccess={getDealTransactions} dealTransactions={dealTransactions} />
             </Box>
 
             <Paper sx={{ height: 420 }}>
@@ -193,46 +159,15 @@ export default function Subform({ DealId, Deal_Transactions }) {
                 pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
               />
             </Paper>
-
-            {/* <Box mt={1}>
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                onClick={""}
-                //disabled={quoteSaving}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: 2,
-                  py: 1.2,
-                }}
-              >
-                {response == "success" ? <Snackbar
-                  open={""}
-                  autoHideDuration={3000}
-                  onClose={""}
-                  message="Deal Updated Successfully"
-                /> :
-                  <Snackbar
-                    open={""}
-                    autoHideDuration={3000}
-                    onClose={""}
-                    message="Invalid Data"
-                  /> 
-                }
-
-                Save Changes
-              </Button>
-            </Box> */}
-
-            {/* {editQuote && (
-              <EditQuoteTest
-                quote={editQuote}
-                onClose={() => setEditQuote(null)}
-                onSuccess={getQuotes}
-                quote_stage_list={quote_stage_list}
+            {editSubform && (
+              <EditSubformData
+                DealId={DealId}
+                subform={editSubform}
+                onClose={() => setEditSubform(null)}
+                onSuccess={getDealTransactions}
+                dealTransactions={dealTransactions}
               />
-            )} */}
+            )}
           </CardContent>
         </Card>
       </Box>

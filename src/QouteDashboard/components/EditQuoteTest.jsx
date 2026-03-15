@@ -49,7 +49,6 @@ export default function EditQuoteTest({ quote, onClose, onSuccess, quote_stage_l
     const [quoteStage, setQuoteStage] = useState(quote.Quote_Stage);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [products, setProducts] = useState([]);
-
     const [open, setOpen] = React.useState(false);
     const [saving, setSaving] = useState(false);
     const [validTill, setValidTill] = useState(quote.Valid_Till);
