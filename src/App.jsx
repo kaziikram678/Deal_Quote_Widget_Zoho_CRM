@@ -9,7 +9,9 @@ import DealDetails from './DealDetails';
 import { reducer, initialState } from './QouteDashboard/components/QouteReducer_new';
 import Subform from './Subform/Subform';
 import AddSubformData from './Subform/AddSubformData';
-
+import { Box, Button } from '@mui/material';
+import ShinyBarChartHorizontal from './BarChart/QuoteTotal';
+import QuoteTotalBarChart from './BarChart/QuoteTotal';
 
 
 
@@ -28,11 +30,17 @@ export default function App() {
   const [entityId, setEntityId] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const closeWidget =async () => {
+    await ZOHO.CRM.UI.Popup.closeReload()
+      .then(function (data) {
+        console.log(data)
+      })
+  }
 
   useEffect(() => {
     ZOHO.embeddedApp.on("PageLoad", function (data) {
 
-      ZOHO.CRM.UI.Resize({ height: "1500", width: "1050" }).then(function (data) {
+      ZOHO.CRM.UI.Resize({ height: "1800", width: "1800" }).then(function (data) {
         console.log(data);
       });
       setModuleName(data.Entity);
@@ -94,7 +102,24 @@ export default function App() {
     //<CssBaseline />
     <>
       <DealDetails DealId={entityId} moduleName={moduleName} formDataList={formDataList} loading={loading} Account_Id={formDataList.Account_Id} Contact_Id={formDataList.Contact_Id} />
-      <Subform DealId={entityId} Deal_Transactions={formDataList.Deal_Transactions}/>
+      <Subform DealId={entityId} Deal_Transactions={formDataList.Deal_Transactions} />
+      <Box mt={1}>
+        <Button
+          variant="contained"
+          size="large"
+           onClick={closeWidget}
+          sx={{
+            textTransform: "none",
+            borderRadius: 2,
+            py: 1.2,
+            mx: 2,
+            my: -1.5
+          }}
+        >
+          Close
+        </Button>
+      </Box>
+      {/* <QuoteTotalBarChart/> */}
     </>
 
     //</ThemeProvider>

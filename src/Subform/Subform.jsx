@@ -4,12 +4,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  Snackbar,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -24,11 +18,6 @@ import EditSubformData from "./EditSubformData";
 const ZOHO = window.ZOHO
 
 export default function Subform({ DealId }) {
-
-  // console.log(Deal_Transactions)
-
-  const [quotes, setQuotes] = useState([]);
-  const [editDealTran, setEditQuote] = useState(null);
 
   const [open, setOpen] = useState(false)
 
@@ -65,14 +54,13 @@ export default function Subform({ DealId }) {
 
     const dealTransactionsAfterDelete = dealTransactions.filter((item) => item.id != id)
 
-    console.log(dealTransactionsAfterDelete);
-    //setDealTransactions(dealTransactionsAfterDelete);
+    setDealTransactions(dealTransactionsAfterDelete)
 
     const config = {
       Entity: "Deals",
       APIData: {
         id: DealId,
-        Deal_Transactions: [dealTransactionsAfterDelete]
+        Deal_Transactions: dealTransactions.filter((item) => item.id != id)
       },
     };
 
@@ -80,14 +68,10 @@ export default function Subform({ DealId }) {
       .then(function (res) {
         console.log(res.data[0].status);
       })
-
-    //setDealTransactions();
     setOpen(false);
-    onSuccess()
-    onClose()
   }
 
-  console.log(dealTransactions)
+  //console.log(dealTransactions)
   const columns = [
     { field: "Transaction_Name", headerName: "Transaction_Name", width: 200 },
     { field: "Email", headerName: "Email", width: 200 },
@@ -96,7 +80,7 @@ export default function Subform({ DealId }) {
     {
       field: "actions",
       headerName: "Action",
-      width: 150,
+      width: 110,
       sortable: false,
       renderCell: (params) => (
         <Box>
@@ -142,7 +126,7 @@ export default function Subform({ DealId }) {
               <AddSubformData DealId={DealId} onSuccess={getDealTransactions} dealTransactions={dealTransactions} />
             </Box>
 
-            <Paper sx={{ height: 420 }}>
+            <Paper sx={{ height: 370 }}>
               <DataGrid
                 sx={{
                   boxShadow: 2,
@@ -156,7 +140,10 @@ export default function Subform({ DealId }) {
                 columns={columns}
                 editMode="row"
                 hideFooterSelectedRowCount
-                pageSizeOptions={[5, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
+                 initialState={{
+                  pagination: { paginationModel: { pageSize: 5 } },
+                }}
+                pageSizeOptions={[5, 25, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
               />
             </Paper>
             {editSubform && (

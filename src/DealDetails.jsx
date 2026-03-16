@@ -17,13 +17,6 @@ import {
   Stack
 } from "@mui/material";
 import QuoteTable from "./QouteDashboard/components/Qoute-table";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
-import AccountDetails from "./QouteDashboard/components/AccountDetails";
-import ContactDetails from "./QouteDashboard/components/ContactDetails";
-import Modal from '@mui/material/Modal';
-import { Subform } from "./Subform/Subform";
-
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -39,7 +32,7 @@ const MenuProps = {
 const ZOHO = window.ZOHO;
 export default function DealDetails({ DealId, moduleName, formDataList, loading, Account_Id, Contact_Id }) {
 
-  //console.log(Contact_Id)
+  //console.log(formDataList.Contact_Name)
 
   const [open, setOpen] = React.useState(false);
 
@@ -48,6 +41,14 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
   const [stageList, setStageList] = useState([]);
 
   const [accounts, setAccounts] = useState([]);
+
+  const [dealSaving, setdealSaving] = useState(false);
+
+  const [quoteSaving, setQuoteSaving] = useState(false);
+  const [openOnSuccess, setOpenOnSuccess] = React.useState(false);
+  const [openOnError, setOpenOnError] = React.useState(false);
+    const [response, setResponse] = useState("");
+  
 
 
   const stage_list = stageList.toString().split(",");
@@ -64,6 +65,22 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
   }, [formDataList])
 
   ///////////////////////////Snakebar//////////////////////////
+
+  const handleCloseOnSuccess = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenOnSuccess(false);
+  };
+
+  const handleCloseOnError = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenOnError(false);
+  };
+
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -92,206 +109,246 @@ export default function DealDetails({ DealId, moduleName, formDataList, loading,
     });
   };
 
-  useEffect(() => {
-    var conn_name = "ikram_connection_crm";
-    var req_data = {
-      "method": "GET",
-      "url": "https://www.zohoapis.com/crm/v8/Accounts?fields=Account_Name",
-      "param_type": 1
+
+ const handleDealUpdate = async () => {
+    setdealSaving(true);
+    setOpenOnSuccess(true);
+    setOpenOnError(true);
+    // console.log(formData.Contact_Name);
+    const config = {
+      Entity: moduleName,
+      APIData: {
+        id: DealId,
+        Deal_Name: formData.Deal_Name,
+        Account_Name: formData.Account_Name,
+        Amount: formData.Amount,
+        Contact_Phone: formData.Contact_Phone,
+        Stage: formData.Stage,
+      },
     };
-    ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
-      .then(function (data) {
-        const account = data.details.statusMessage;
-        const rows = (account.data || []).map((item) => ({
-          id: item.id,
-          name: item.Account_Name
-        }));
 
-        setAccounts(rows);
-
+    await ZOHO.CRM.API.updateRecord(config)
+      .then(function (res) {
+        console.log(res.data[0].status);
+        setResponse(res.data[0].status);
       })
-  }, [])
+  };
+
+    useEffect(() => {
+      var conn_name = "ikram_connection_crm";
+      var req_data = {
+        "method": "GET",
+        "url": "https://www.zohoapis.com/crm/v8/Accounts?fields=Account_Name",
+        "param_type": 1
+      };
+      ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
+        .then(function (data) {
+          const account = data.details.statusMessage;
+          const rows = (account.data || []).map((item) => ({
+            id: item.id,
+            name: item.Account_Name
+          }));
+
+          setAccounts(rows);
+
+        })
+    }, [])
 
 
-  //console.log(accounts);
-  // console.log(formData.Account_Name);
+    //console.log(accounts);
+    // console.log(formData.Account_Name);
 
-  return (
-    <>
-      <Box
-        sx={{
-          minHeight: "50vh",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f4f6f8",
-          p: 2,
-        }}
-      >
-        <Card
-          elevation={4}
+    return (
+      <>
+        <Box
           sx={{
-            width: 1000,
-            borderRadius: 3,
-
+            minHeight: "50vh",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f4f6f8",
+            p: 2,
           }}
         >
-          <CardContent>
-            <Typography align="center" variant="h6" fontWeight="600" gutterBottom>
-              Deal Widget
-            </Typography>
+          <Card
+            elevation={4}
+            sx={{
+              width: 1000,
+              borderRadius: 3,
 
-            <Typography variant="h7" fontWeight="300" gutterBottom>
-              Deal Detail Section
-            </Typography>
+            }}
+          >
+            <CardContent>
+              <Typography align="center" variant="h6" fontWeight="600" gutterBottom>
+                Deal Widget
+              </Typography>
 
-            <Divider sx={{ mb: 2 }} />
+              <Typography variant="h7" fontWeight="300" gutterBottom>
+                Deal Detail Section
+              </Typography>
 
-            
+              <Divider sx={{ mb: 2 }} />
 
-            {loading ? (
-              <Box display="flex" justifyContent="center" py={1}>
-                <CircularProgress />
-              </Box>
-            ) : (
-              <>
-                <Stack direction="row" spacing={2}>
-                  <TextField
-                    fullWidth
-                    label="Deal_Name"
-                    name="Deal_Name"
-                    value={formData.Deal_Name}
-                    onChange={handleChange}
-                    margin="normal"
-                  />
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Amount"
-                    name="Amount"
-                    value={formData.Amount}
-                    onChange={handleChange}
-                    margin="normal"
-                  />
-                </Stack>
-
-                <Divider sx={{ mb: 2 }} />
-
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    size="large"
-                    color="white"
-                    startIcon={<AccountCircleIcon />}
-                    onClick={handleModalOpen}
-                    sx={{
-                      textTransform: "none",
-                      textAlign: "left",
-                      borderRadius: 0.5,
-                      borderColor: "gray",
-                      py: 1.2,
-                    }}
-                  >
-                    {formData.Account_Name}
-                  </Button>
-                  <Modal
-                    open={modalOpen}
-                    onClose={handleModalClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                  >
-                    <AccountDetails Account_Id={Account_Id}/>
-                  </Modal>
-
-                  <FormControl sx={{ my: 1, width: 960 }}>
-                    <InputLabel id="demo-multiple-name-label">
-                      Account_Name
-                    </InputLabel>
-                    <Select
-                      labelId="demo-multiple-name-label"
-                      id="demo-multiple-name"
-                      name="Account_Name"
-                      value={formData.Account_Name}
+              {loading ? (
+                <Box display="flex" justifyContent="center" py={1}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <>
+                  <Stack direction="row" spacing={2}>
+                    <TextField
+                      fullWidth
+                      label="Deal_Name"
+                      name="Deal_Name"
+                      value={formData.Deal_Name}
                       onChange={handleChange}
-                      input={<OutlinedInput label="Account_Name" />}
-                      MenuProps={MenuProps}
-                    >
-                      {accounts.map((item) => (
-                        <MenuItem key={item.id} value={item.name}>
-                          {item.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  {/* <Button
-                    fullWidth
-                    variant="outlined"
-                    size="large"
-                    color="white"
-                    startIcon={<ContactPhoneIcon />}
-                    onClick={handleModalOpen}
-                    sx={{
-                      textTransform: "none",
-                      borderRadius: 0.5,
-                      borderColor: "gray",
-                      py: 1.2,
-                    }}
-                  >
-                    {formData.Contact_Name}
-                  </Button> */}
-                  {/* <Modal
-                    open={modalOpen}
-                    onClose={handleModalClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                  >
-                    <ContactDetails Contact_Id={Contact_Id}/>
-                  </Modal> */}
-                </Stack>
-
-                <Divider sx={{ mb: 2 }} />
-
-                <Stack direction="row" spacing={2}>
-                  <TextField
-                    type="phone"
-                    fullWidth
-                    label="Contact_Phone"
-                    name="Contact_Phone"
-                    value={formData.Contact_Phone}
-                    onChange={handleChange}
-                    margin="normal"
-                  />
-
-                  <FormControl sx={{ my: 1, width: 960 }}>
-                    <InputLabel id="demo-multiple-name-label">
-                      Stage
-                    </InputLabel>
-                    <Select
-                      labelId="demo-multiple-name-label"
-                      id="demo-multiple-name"
-                      name="Stage"
-                      value={formData.Stage}
+                      margin="normal"
+                    />
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Amount"
+                      name="Amount"
+                      value={formData.Amount}
                       onChange={handleChange}
-                      input={<OutlinedInput label="Name" />}
-                      MenuProps={MenuProps}
+                      margin="normal"
+                    />
+                  </Stack>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack direction="row" spacing={2}>
+                    {/* <Button
+                      fullWidth
+                      variant="outlined"
+                      size="large"
+                      color="white"
+                      startIcon={<AccountCircleIcon />}
+                      onClick={handleModalOpen}
+                      sx={{
+                        textTransform: "none",
+                        textAlign: "left",
+                        borderRadius: 0.5,
+                        borderColor: "gray",
+                        py: 1.2,
+                      }}
                     >
-                      {stage_list.map((item) => (
-                        <MenuItem key={item} value={item}>
-                          {item}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Stack>
-                <Divider sx={{ mb: 2 }} />
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-      <QuoteTable DealId={DealId} moduleName={moduleName} formDataList={formData} loading={loading} stage_list={stage_list} />
-    </>
-  );
-}
+                      {formData.Account_Name}
+                    </Button>
+                    <Modal
+                      open={modalOpen}
+                      onClose={handleModalClose}
+                      aria-labelledby="modal-modal-title"
+                      aria-describedby="modal-modal-description"
+                    >
+                      <AccountDetails Account_Id={Account_Id} />
+                    </Modal> */}
+
+                    <FormControl sx={{ my: 1, width: 960 }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Account_Name
+                      </InputLabel>
+                      <Select
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
+                        name="Account_Name"
+                        value={formData.Account_Name}
+                        onChange={handleChange}
+                        input={<OutlinedInput label="Account_Name" />}
+                        MenuProps={MenuProps}
+                      >
+                        {accounts.map((item) => (
+                          <MenuItem key={item.id} value={item.name}>
+                            {item.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                   <TextField
+                      type="text"
+                      fullWidth
+                      //label="Contact_Phone"
+                      name="Contact_Phone"
+                      value={formData.Contact_Name}
+                      //onChange={handleChange}
+                      margin="normal"
+                    />
+
+                  </Stack>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack direction="row" spacing={2}>
+                    <TextField
+                      type="phone"
+                      fullWidth
+                      label="Contact_Phone"
+                      name="Contact_Phone"
+                      value={formData.Contact_Phone}
+                      onChange={handleChange}
+                      margin="normal"
+                    />
+
+                    <FormControl sx={{ my: 1, width: 960 }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Stage
+                      </InputLabel>
+                      <Select
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
+                        name="Stage"
+                        value={formData.Stage}
+                        onChange={handleChange}
+                        input={<OutlinedInput label="Name" />}
+                        MenuProps={MenuProps}
+                      >
+                        {stage_list.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Stack>
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Box mt={1}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      size="large"
+                      onClick={handleDealUpdate}
+                      disabled={dealSaving}
+                      sx={{
+                        textTransform: "none",
+                        borderRadius: 2,
+                        py: 1.2,
+                      }}
+                    >
+                      {response == "success" ? <Snackbar
+                        open={openOnSuccess}
+                        autoHideDuration={3000}
+                        onClose={handleCloseOnSuccess}
+                        message="Deal Updated Successfully"
+                      /> :
+                        <Snackbar
+                          open={openOnError}
+                          autoHideDuration={3000}
+                          onClose={handleCloseOnError}
+                          message="Invalid Data"
+                        />
+                      }
+                    
+                      Save Changes
+                    </Button>
+                  </Box>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+        <QuoteTable DealId={DealId} moduleName={moduleName} formDataList={formData} loading={loading} stage_list={stage_list} />
+      </>
+    );
+  }
 
